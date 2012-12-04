@@ -1,13 +1,13 @@
 r"""
-Hypergeometric Series
+Basic Hypergeometric Series
 
-A module for computing Hypergeometric series.
+A module for computing basic hypergeometric series.
 
 AUTHORS:
     - Noud Aldenhoven (18 November 2012)
 
 REFERENCES:
-    - Special Functions - Andrews, Askey, Roy
+    - Basic Hypergeometric Series - Gasper, Rahman
 """
 
 from sage.misc.misc import prod
@@ -16,14 +16,15 @@ from sage.rings.arith import binomial
 
 class qPochhammerSymbol():
     r"""
-    Pochhammer symbol
+    qPochhammer symbol
 
     INPUT::
         - ``list_a``    - a list of ring elements.
+        - ``q``         - the q-parameter.
         - ``n``         - zero or a positive integer.
 
     OUTPUT::
-        - a PochhammerSymbol object.
+        - a qPochhammerSymbol object.
 
     EXAMPLES::
         
