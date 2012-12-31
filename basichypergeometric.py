@@ -4,7 +4,7 @@ Basic Hypergeometric Series
 A module for computing basic hypergeometric series.
 
 AUTHORS:
-    - Noud Aldenhoven (18 November 2012)
+    - Noud Aldenhoven - initial file (2012)
 
 REFERENCES:
     - Basic Hypergeometric Series - Gasper, Rahman
@@ -28,68 +28,60 @@ class qPochhammerSymbol():
 
     EXAMPLES::
         
-        Let us start with defining Pochhammer symbols::
+        Let us start with defining qPochhammer symbols::
 
-            sage: poch1 = PochhammerSymbol(5, 3)
-            sage: poch1
-            (5)_3
-            sage: latex(poch1)
-            (5)_{3}
+            sage: qpoch1 = qPochhammerSymbol(5, 1/2, 3)
+            sage: qpoch1 
+            (5;1/2)_3
             
-        with one unknown variable::
+        with a unknown q-parameter and one unknown variable::
 
-            sage: a = var('a')
-            sage: poch2 = PochhammerSymbol(a, 3)
-            sage: poch2
-            (a)_3
-            sage: latex(poch2)
-            (a)_{3}
+            sage: q, a = var('q a')
+            sage: qpoch2 = qPochhammerSymbol(a, q, 3)
+            sage: qpoch2
+            (a;q)_3
 
         with an unknown variable label::
 
             sage: n = var('n')
-            sage: poch3 = PochhammerSymbol(a, n)
-            sage: poch3
-            (a)_n
-            sage: latex(poch3)
-            (a)_{n}
+            sage: qpoch3 = qPochhammerSymbol(a, q, n)
+            sage: qpoch3
+            (a;q)_n
 
         with more unknown variables::
 
             sage: b = var('b')
-            sage: poch4 = PochhammerSymbol([a, b], 3)
-            sage: poch4
-            (a,b)_3
-            sage: latex(poch4)
-            (a,b)_{3}
+            sage: qpoch4 = qPochhammerSymbol([a, b], q, 3) 
+            sage: qpoch4
+            (a,b;q)_3
 
-        We evaluate the Pochhammer symbols as follow::
+        We evaluate the qPochhammer symbols as follow::
 
-            sage: poch1.evaluate()
-            210
-            sage: poch2.evaluate()
-            (a + 1)*(a + 2)*a
-            sage: poch3.evaluate() # Not implemented in the current version
+            sage: qpoch1.evaluate()
+            -3/2
+            sage: qpoch2.evaluate()
+            -(a - 1)*(a*q - 1)*(a*q^2 - 1)
+            sage: qpoch3.evaluate()
             0
-            sage: poch4.evaluate()
-            (b + 1)*(b + 2)*(a + 1)*(a + 2)*a*b
+            sage: qpoch4.evaluate()
+            (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*(b*q^2 - 1)*(a*q^2 - 1)
 
     """
     def __init__(self, list_a, q, n):
         """
-        See the docstring form :meth:`PochhammerSymbol`.
+        See the docstring form :meth:`qPochhammerSymbol`.
 
         EXAMPLES::
 
-            sage: a, b, n = var('a b n')
-            sage: PochhammerSymbol(5, 3)
-            (5)_3
-            sage: PochhammerSymbol(a, 3)
-            (a)_3
-            sage: PochhammerSymbol(a, n)
-            (a)_n
-            sage: PochhammerSymbol([a, b], n)
-            (a,b)_n
+            sage: q, a, b, n = var('q a b n')
+            sage: qPochhammerSymbol(5, 1/2, 3)
+            (5;1/2)_3
+            sage: qPochhammerSymbol(a, q, 3)
+            (a;q)_3
+            sage: qPochhammerSymbol(a, q, n)
+            (a;q)_n
+            sage: qPochhammerSymbol([a, b], q, n)
+            (a,b;q)_n
 
         """
         self.list_a = list_a if type(list_a) == list else [list_a]
@@ -100,15 +92,15 @@ class qPochhammerSymbol():
         """
         EXAMPLES::
 
-            sage: a, b, n = var('a b n')
-            sage: latex(PochhammerSymbol(5, 3))
-            (5)_{3}
-            sage: latex(PochhammerSymbol(a, 3))
-            (a)_{3}
-            sage: latex(PochhammerSymbol(a, n))
-            (a)_{n}
-            sage: latex(PochhammerSymbol([a, b], n))
-            (a,b)_{n}
+            sage: q, a, b, n = var('q a b n')
+            sage: latex(qPochhammerSymbol(5, 1/2, 3))
+            (5;1/2)_{3}
+            sage: latex(qPochhammerSymbol(a, q, 3))
+            (a;q)_{3}
+            sage: latex(qPochhammerSymbol(a, q, n))
+            (a;q)_{n}
+            sage: latex(qPochhammerSymbol([a, b], q, n))
+            (a,b;q)_{n}
     
         """
         return "(%s;%s)_{%s}" % (','.join(map(str, self.list_a)), str(self.q), \
@@ -118,15 +110,15 @@ class qPochhammerSymbol():
         """
         EXAMPLES::
 
-            sage: a, b, n = var('a b n')
-            sage: PochhammerSymbol(5, 3)
-            (5)_3
-            sage: PochhammerSymbol(a, 3)
-            (a)_3
-            sage: PochhammerSymbol(a, n)
-            (a)_n
-            sage: PochhammerSymbol([a, b], n)
-            (a,b)_n
+            sage: q, a, b, n = var('q, a b n')
+            sage: qPochhammerSymbol(5, 1/2, 3)
+            (5;1/2)_3
+            sage: qPochhammerSymbol(a, q, 3)
+            (a;q)_3
+            sage: qPochhammerSymbol(a, q, n)
+            (a;q)_n
+            sage: qPochhammerSymbol([a, b], q, n)
+            (a,b;q)_n
         
         """
         return "(%s;%s)_%s" % (','.join(map(str, self.list_a)), str(self.q), \
@@ -138,12 +130,12 @@ class qPochhammerSymbol():
 
         EXAMPLES::
 
-            sage: a, n = var('a n')
-            sage: PochhammerSymbol(5, 3).evaluate()
-            210
-            sage: PochhammerSymbol(a, 3).evaluate()
-            (a + 1)*(a + 2)*a
-            sage: PochhammerSymbol(a, n).evaluate()
+            sage: q, a, n = var('q a n')
+            sage: qPochhammerSymbol(5, 1/2, 3).evaluate()
+            -3/2
+            sage: qPochhammerSymbol(a, 3).evaluate()
+            -(a - 1)*(a*q - 1)*(a*q^2 - 1)
+            sage: qPochhammerSymbol(a, n).evaluate()
             0
         
         """
@@ -156,24 +148,26 @@ class qPochhammerSymbol():
 
     def evaluate(self):
         """
-        Evaluate Pochhammer symbols.
+        Evaluate qPochhammer symbols.
 
         EXAMPLES::
 
-            sage: a, b, n = var('a b n')
-            sage: PochhammerSymbol(5, 3).evaluate()
-            210
-            sage: PochhammerSymbol(a, 3).evaluate()
-            (a + 1)*(a + 2)*a
-            sage: PochhammerSymbol(a, n).evaluate() # Not implemented yet, returns 0
+            sage: q, a, b, n = var('1 a b n')
+            sage: qPochhammerSymbol(5, 1/2, 3).evaluate()
+            -3/2
+            sage: qPochhammerSymbol(a, q, 3).evaluate()
+            -(a - 1)*(a*q - 1)*(a*q^2 - 1)
+            sage: qPochhammerSymbol(a, q, n).evaluate() # Not implemented yet
             0
-            sage: PochhammerSymbol([a, b], 3).evaluate()
-            (b + 1)*(b + 2)*(a + 1)*(a + 2)*a*b
+            sage: qPochhammerSymbol([a, b], q, 3).evaluate()
+            (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*(b*q^2 - 1)*(a*q^2 - 1)
         
         """
         if self.n >= 0:
             return prod([ self._eval_single(elm, self.q) \
                             for elm in self.list_a ])
+        
+        ## TODO:: Implement fully symbolic qPochhammer symbol
         else:
             return 0
 
