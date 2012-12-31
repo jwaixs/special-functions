@@ -173,15 +173,16 @@ class qPochhammerSymbol():
 
 class BasicHypergeometricSeries():
     """
-    An implementation of the Hypergeometric series.
+    An implementation of the Basic Hypergeometric Series.
 
     INPUT::
         - `list_a`  - list of nominators.
         - `list_b`  - list of denominators.
+        - `q`       - the q-parameter
         - `z`       - the power of the Hypergeometric series.
 
     OUTPUT::
-        - An object HypergeometriSeries which can be used the compute or
+        - An object BasicHypergeometriSeries which can be used the compute or
           approximate the Hypergeometric series.
 
     EXAMPLES::
