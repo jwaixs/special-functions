@@ -26,9 +26,13 @@ EXAMPLES::
         1 + (q+1)*c*b + q*d*b
         sage: rewrite_formula(1/(q+2)*b*d + q**(-1)*a*b, rewrite_rules)
         b*a + (q/(q+2))*d*b
+
 """
 
 import re
+from sage.gsl.interpolation import spline
+from string import join
+from sage.calculus.functional import expand
 
 def expand_term(term):
     old_term = re.split('(\\^|\\*)', term)
