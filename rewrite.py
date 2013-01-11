@@ -13,7 +13,7 @@ EXAMPLES::
     Here we implement an algebraic structure for the vectorspace of the
     quantised algebra of polynomials on SU(2)::
 
-        sage: A = FunctionField(AA, 'q')
+    sage: A = FunctionField(AA, 'q')
         sage: q = A.gen()
         sage: B = FreeAlgebra(A, 4, 'abcd')
         sage: a, b, c, d = B.gens()
