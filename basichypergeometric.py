@@ -235,14 +235,13 @@ class BasicHypergeometricSeries():
                 sage: bool(bhs1.evaluate() == bhs2.evaluate()*(1 - q**(-5)*z)/(1 - z))
                 True
 
-            Test Heine's transformation formulas::
-sage: a, q, z = var('a q z')
-sage: b, c = q**(-3), q**(-5)
-sage: bhs1 = BasicHypergeometricSeries([a, b], [c], q, z)
-sage: bhs2 = BasicHypergeometricSeries([c/b, z], [a*z], q, b)
-sage: qpoch1 = qPochhammerSymbol([b, a*z], q, oo)
-sage: qpoch2 = qPochhammerSymbol([c, z], q, oo)
-                
+            Test Heine's transformation formulas for a special case::
+
+                sage: a, b, c, z = q**(-2), q**(-3), q**(-4), q**(-3)
+                sage: bhs1 = BasicHypergeometricSeries([a, b], [c], q, z)
+                sage: bhs2 = BasicHypergeometricSeries([c/b, z], [a*z], q, b)
+                sage: bool(bhs1.evaluate() == (1 - q**(-5))*bhs2.evaluate())
+                True
 
         """
         self.list_a = list_a
