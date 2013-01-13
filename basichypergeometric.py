@@ -219,9 +219,25 @@ class BasicHypergeometricSeries():
             sage: BasicHypergeometricSeries([a, b], [c], q, z)
             (2)_phi_(1)(a,b;c;q,z)
 
+        TESTS::
+
+            Remove duplicates in the nominator and denominator::
+
+                sage: q, z = var('q z')
+                sage: BasicHypergeometricSeries([q**(-2), q**(-3)], [q**(-3), q**(-4)], q, z)
+                (1)_phi_(1)(q^(-2);q^(-4);q,z)
+
         """
         self.list_a = list_a
         self.list_b = list_b
+
+        # remove duplicates in list_a \cap list_b to avoid dividing by zero
+        temp_a = self.list_a[:]
+        for elm in temp_a:
+            if elm in self.list_b:
+                self.list_a.remove(elm)
+                self.list_b.remove(elm)
+
         self.q = q
         self.z = z
 
