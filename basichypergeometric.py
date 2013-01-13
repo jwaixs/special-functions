@@ -138,22 +138,12 @@ class qPochhammerSymbol():
             -(a - 1)*(a*q - 1)*(a*q^2 - 1)
             sage: qPochhammerSymbol(a, q, n).evaluate()
             0
-            sage: qPochhammerSymbol(q**(-3), q, oo).evaluate()
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)
         
         """
         ret = 1
 
-        if type(self.n) == PlusInfinity:
-            i, elm = 0, 1 - a
-       
-            while elm != 0:
-                ret *= elm
-                i += 1
-                elm = 1 - a*q**i
-        else:
-            for i in xrange(self.n):
-                ret *= 1 - a*q**i
+        for i in xrange(self.n):
+            ret *= 1 - a*q**i
 
         return ret
 
@@ -172,8 +162,8 @@ class qPochhammerSymbol():
             0
             sage: qPochhammerSymbol([a, b], q, 3).evaluate()
             (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*(b*q^2 - 1)*(a*q^2 - 1)
-        
         """
+
         if self.n >= 0:
             return prod([ self._eval_single(elm, self.q) \
                             for elm in self.list_a ])
@@ -246,7 +236,12 @@ class BasicHypergeometricSeries():
                 True
 
             Test Heine's transformation formulas::
-
+sage: a, q, z = var('a q z')
+sage: b, c = q**(-3), q**(-5)
+sage: bhs1 = BasicHypergeometricSeries([a, b], [c], q, z)
+sage: bhs2 = BasicHypergeometricSeries([c/b, z], [a*z], q, b)
+sage: qpoch1 = qPochhammerSymbol([b, a*z], q, oo)
+sage: qpoch2 = qPochhammerSymbol([c, z], q, oo)
                 
 
         """
