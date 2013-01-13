@@ -224,8 +224,8 @@ class BasicHypergeometricSeries():
             Remove duplicates in the nominator and denominator::
 
                 sage: q, z = var('q z')
-                sage: BasicHypergeometricSeries([q**(-2), q**(-3)], [q**(-3), q**(-4)], q, z)
-                (1)_phi_(1)(q^(-2);q^(-4);q,z)
+                sage: BasicHypergeometricSeries([q**(-2), q**(-3), q**(-4), q**(-3)], [q**(-4), q**(-3), q**(-5)], q, z)
+                (2)_phi_(1)(q^(-2),q**(-3);q^(-5);q,z)
 
         """
         self.list_a = list_a
