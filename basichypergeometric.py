@@ -302,12 +302,12 @@ class BasicHypergeometricSeries():
         """
         if key >= 0:
             j, k = len(self.list_a), len(self.list_b)
+
             nominator = qPochhammerSymbol(self.list_a, self.q, key).evaluate()
             denominator = qPochhammerSymbol( \
-                self.list_b, \
-                self.q, \
-                key \
-            ).evaluate() * qPochhammerSymbol(self.q, self.q, key).evaluate()
+                                    self.list_b, self.q, key).evaluate() \
+                * qPochhammerSymbol(self.q, self.q, key).evaluate()
+
             return nominator / denominator \
                 * ((-1)**key * self.q**(binomial(key,2)))**(1 + k - j) \
                 * self.z**key
