@@ -13,6 +13,7 @@ REFERENCES:
 from sage.misc.misc import prod
 from sage.functions.other import factorial
 from sage.rings.arith import binomial
+from sage.rings.infinity import PlusInfinity
 
 class qPochhammerSymbol():
     r"""
@@ -137,12 +138,22 @@ class qPochhammerSymbol():
             -(a - 1)*(a*q - 1)*(a*q^2 - 1)
             sage: qPochhammerSymbol(a, q, n).evaluate()
             0
+            sage: qPochhammerSymbol(q**(-3), q, oo).evaluate()
+            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)
         
         """
         ret = 1
 
-        for i in xrange(self.n):
-            ret *= 1 - a*q**i
+        if type(self.n) == PlusInfinity:
+            i, elm = 0, 1 - a
+       
+            while elm != 0:
+                ret *= elm
+                i += 1
+                elm = 1 - a*q**i
+        else:
+            for i in xrange(self.n):
+                ret *= 1 - a*q**i
 
         return ret
 
@@ -195,18 +206,18 @@ class BasicHypergeometricSeries():
             sage: bhs
             (2)_phi_(1)(a,q^(-3);b;q,z)
             sage: bhs.evaluate()
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1)) + (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*q*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)) - (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)) + 1
+            (1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1)) + (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)) + (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)) + 1            
             sage: bhs[3]
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
+            (1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
             sage: bhs[4]
             0
             sage: bhs[1:3]
-            [-(1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)), (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*q*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))]                                         
+            [(1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)), (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))]            
             sage: for coef in bhs: print coef
             1
-            -(1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1))
-            (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*q*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
+            (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1))
+            (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))
+            (1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
 
     """ 
     def __init__(self, list_a, list_b, q, z):
@@ -225,7 +236,18 @@ class BasicHypergeometricSeries():
 
                 sage: q, z = var('q z')
                 sage: BasicHypergeometricSeries([q**(-2), q**(-3), q**(-4), q**(-3)], [q**(-4), q**(-3), q**(-5)], q, z)
-                (2)_phi_(1)(q^(-2),q**(-3);q^(-5);q,z)
+                (2)_phi_(1)(q^(-2),q^(-3);q^(-5);q,z)
+
+            Test the q-binomial theorem::
+
+                sage: bhs1 = BasicHypergeometricSeries([q**(-5)], [], q, z)
+                sage: bhs2 = BasicHypergeometricSeries([q**(-5)], [], q, q*z)
+                sage: bool(bhs1.evaluate() == bhs2.evaluate()*(1 - q**(-5)*z)/(1 - z))
+                True
+
+            Test Heine's transformation formulas::
+
+                
 
         """
         self.list_a = list_a
@@ -279,12 +301,13 @@ class BasicHypergeometricSeries():
             sage: bhs = BasicHypergeometricSeries([a, b], [c], q, z)
             sage: for i in range(4): print bhs[i]
             1
-            -(b - 1)*(a - 1)*z/((q - 1)*(c - 1))
-            (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*q*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))
-            -(b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*(b*q^2 - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1)*(q^3 - 1)*(c*q^2 - 1))
+            (b - 1)*(a - 1)*z/((q - 1)*(c - 1))
+            (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))
+            (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*(b*q^2 - 1)*(a*q^2 - 1)*z^3/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1)*(q^3 - 1)*(c*q^2 - 1))
         
         """
         if key >= 0:
+            j, k = len(self.list_a), len(self.list_b)
             nominator = qPochhammerSymbol(self.list_a, self.q, key).evaluate()
             denominator = qPochhammerSymbol( \
                 self.list_b, \
@@ -292,7 +315,7 @@ class BasicHypergeometricSeries():
                 key \
             ).evaluate() * qPochhammerSymbol(self.q, self.q, key).evaluate()
             return nominator / denominator \
-                * ((-1)**key * self.q**(binomial(key,2))) \
+                * ((-1)**key * self.q**(binomial(key,2)))**(1 + k - j) \
                 * self.z**key
         else:
             return 0
@@ -304,11 +327,11 @@ class BasicHypergeometricSeries():
             sage: a, b, c, q, z = var('a b c q z')
             sage: bhs = BasicHypergeometricSeries([a, b], [c], q, z)
             sage: bhs[0:3]
-            [1, -(b - 1)*(a - 1)*z/((q - 1)*(c - 1)), (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*q*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))]
+            [1, (b - 1)*(a - 1)*z/((q - 1)*(c - 1)), (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))]
             sage: bhs[1:3]
-            [-(b - 1)*(a - 1)*z/((q - 1)*(c - 1)), (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*q*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))]
+            [(b - 1)*(a - 1)*z/((q - 1)*(c - 1)), (b - 1)*(a - 1)*(b*q - 1)*(a*q - 1)*z^2/((q - 1)*(c - 1)*(q^2 - 1)*(c*q - 1))]
             sage: bhs[:2]
-            [1, -(b - 1)*(a - 1)*z/((q - 1)*(c - 1))]
+            [1, (b - 1)*(a - 1)*z/((q - 1)*(c - 1))]
             sage: bhs[3:2]
             []
 
@@ -333,9 +356,9 @@ class BasicHypergeometricSeries():
             sage: bhs = BasicHypergeometricSeries([a, q**(-3)], [b], q, z)
             sage: for coef in bhs: print coef
             1
-            -(1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1))
-            (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*q*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
+            (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1))
+            (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1))
+            (1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1))
         """
         i = 0
         coef = self[i]
@@ -352,7 +375,7 @@ class BasicHypergeometricSeries():
             sage: a, b, q, z = var('a b q z')
             sage: bhs = BasicHypergeometricSeries([a, q**(-3)], [b], q, z)
             sage: bhs.evaluate()
-            -(1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*q^3*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1)) + (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*q*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)) - (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)) + 1
+            (1/q^3 - 1)*(1/q^2 - 1)*(1/q - 1)*(a - 1)*(a*q - 1)*(a*q^2 - 1)*z^3/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)*(q^3 - 1)*(b*q^2 - 1)) + (1/q^3 - 1)*(1/q^2 - 1)*(a - 1)*(a*q - 1)*z^2/((q - 1)*(b - 1)*(q^2 - 1)*(b*q - 1)) + (1/q^3 - 1)*(a - 1)*z/((q - 1)*(b - 1)) + 1
 
         """
         return sum(list(self))
