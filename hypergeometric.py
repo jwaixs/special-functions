@@ -253,9 +253,26 @@ class HypergeometricSeries():
             sage: HypergeometricSeries([a, b], [c], z)
             (2)_F_(1)(a,b;c;z)
 
+        TESTS::
+
+            Remove duplicates in nominator and denominator::
+
+                sage: a, b, c, z = var('a b c z')
+                sage: HypergeometricSeries([a, b, b**2, b], [b**2, b, c], z)
+                (2)_F_(1)(a,b;c;z)
+
+
         """
         self.list_a = list_a
         self.list_b = list_b
+
+        # remove duplicates in list_a and list_b
+        temp_a = self.list_a[:]
+        for elm in temp_a:
+            if elm in self.list_b:
+                self.list_a.remove(elm)
+                self.list_b.remove(elm)
+
         self.z = z
 
     def _latex_(self):
