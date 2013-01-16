@@ -21,7 +21,7 @@ def coef(l1, l2, l, p, n, algorithm='mathematica'):
                 q**(-4*l2 - 2*p - 2), 2*l2, q**2 \
             )
         elif p >= 2*l1 - 2*l2 and n == 2*l1 - 2*p:
-            result3 = dual_q_Hahn_polynomias( \
+            result3 = dual_q_Hahn_polynomials( \
                 n, l1 + l2 - n, q**(-4*l1 + 2*p - 2), \
                 q**(-4*l2 - 2*p - 2), 2**l1 - 2*p, q**2
             )
