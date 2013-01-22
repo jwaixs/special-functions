@@ -35,12 +35,48 @@ def normalized_cgc_p(l1, l2, l, p):
 
     for n in range(2*l2 + 1):
         cg = coef(l1, l2, l, p, n, algorithm='mathematica')
-        cgc.append((l1, l2, l, l1-p-n, l2-n, l1-l2-p), cg)
+        cgc.append(((l1, l2, l, l1-p-n, l2-n, l1-l2-p), cg))
 
     cgc_sum = sum([ elm[1]**2 for elm in cgc ])
-    cgc2 = [ (elm[0], mathematica(sqrt(1/cgc_sum)).FullSimplify().sage()) \
+    cgc2 = [ (elm[0], mathematica(sqrt(1/cgc_sum)*elm[1]).Simplify([0 < q, q < 1]).sage()) \
         for elm in cgc ]
 
     return cgc2
     
-    
+def normalized_cgc(l1, l2, l):
+    q = var('q')
+    cgc = {}
+
+    for p in range(2*l + 1):
+        cgc2 = normalized_cgc_p(l1, l2, l, p)
+        for key, elm in cgc2:
+            cgc[key] = elm
+
+    return cgc 
+
+def inverse_cgc(cgc):
+    import copy
+    cgc2 = copy.deepcopy(cgc)
+    for key in cgc:
+        cgc2[(key[1], key[0], key[2], key[4], key[3], -key[5])] = cgc[key]
+    return cgc2
+
+def print_normalized_cgc(l1, l2, l):
+    cgc = normalized_cgc(l1, l2, l)
+    for key in cgc:
+        print key, "\t=\t", cgc[key]
+
+#cgc1 = inverse_cgc(normalized_cgc(1, 1/2, 1/2))
+#cgc2 = normalized_cgc(1/2, 1/2, 0)
+#cgc3 = inverse_cgc(normalized_cgc(1/2, 1/2, 1))
+#
+#import itertools
+#
+#cgc_sum = 0
+#
+#for j1, i1, i2, n2 in itertools.product([-1/2, 1/2], repeat=4):
+#    for j2, n1 in itertools.product([-1, 0, 1], repeat=2):
+#        if j1 - j2 == 1/2 and i1 - i2 == 0 and j1 - i1 == n1 and j2 - i2 == n2 and n1 - n2 == 1/2:
+#            c1, c2, c3, c4, c5, cgc_sum = cgc1[(1/2, 1, 1/2, j1, j2, 1/2)], cgc2[(1/2, 1/2, 0, i1, i2, 0)], cgc3[(1/2, 1/2, 1, j1, i1, n1)], cgc1[(1, 1/2, 1/2, j2, i2, n2)], cgc1[(1, 1/2, 1/2, n1, n2, 1/2)], cgc_sum + c1*c2*c3*c4*c5
+#
+#print mathematica(cgc_sum).Simplify().sage()
