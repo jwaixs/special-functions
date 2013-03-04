@@ -94,9 +94,8 @@ def new_normalized_cgc(l1, l2, l, p, n):
         l1 + l2 - l).evaluate()
     line1 = sqrt(qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
-    line2 = sqrt((1 - q**(4*l + 2)) / (1 - q**(4*l1 + 4*l2 + 2))) \
-        * q**(l2*(-4*l1 + 2*p) + (2*l1 + 2*l2 - p - 1)*(l1 + l2 - l) \
-            - binomial(l1 + l2 - l, 2))
+    line2 = sqrt((1 - q**(-4*l - 2)) / (1 - q**(-4*l1 - 4*l2 - 2))) \
+        * q**((l1+l2-l)*(2*l1+2*l2-p)+l2*(2*p-4*l1)-binomial(l1 + l2 - l, 2))
 
     qpoch5 = qPochhammerSymbol([q**(-4*l2), q**(-4*l1 + 2*p)], \
         q**2, n).evaluate()
