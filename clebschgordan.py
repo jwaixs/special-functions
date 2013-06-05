@@ -105,3 +105,16 @@ def new_normalized_cgc(l1, l2, l, p, n):
     line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
 
     return line1 * line2 * line3
+
+def cgc1(l, n):
+    return (-1)**n*q**(2*l-n)*sqrt((1 - q**4)*(1 - q**(4*l-2*n+2))/((1 - q**(4*l+2))*(1 - q**(4*l + 4))))
+
+def cgc2(l, n):
+    return (-1)**n*q**(4*l-2*n)*sqrt((1 - q**4)*(1 - q**(2*n+2))/((1 - q**(4*l+2))*(1 - q**(4*l+4))))
+
+def test_cgcs(l, n):
+    p1 = (l+1/2, l, 1/2, l+1/2-n, l-n, 1/2)
+    p2 = (l+1/2, l, 1/2, l-1/2-n, l-n, -1/2)
+    ncgc = normalized_cgc(l+1/2, l, 1/2)
+
+    return p1, p2

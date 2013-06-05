@@ -9,7 +9,7 @@ class Askey_Wilson_polynomials():
         self.param = [a, b, c, d]
 
     def monic_three_term(self):
-        n, q, x, a, b, c, d = [self.n, self.x, self.q] + self.param
+        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
 
         nom = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*(1 - a*b*c*d*q**(n-1))
         denom = a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n))
