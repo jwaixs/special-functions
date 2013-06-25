@@ -25,6 +25,31 @@ class Askey_Wilson_polynomials():
         rec3 = 1/4*An.substitute({n : n-1})*Cn
 
         return rec1, rec2, rec3
+
+    def upto(self):
+        result = [0, 1]
+        endn, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+
+        for n in range(2, endn+1):
+            nom = (1 - a*b*q**n) * (1 - a*c*q**n) * (1 - a*d*q**n) \
+                * (1 - a*b*c*d*q**(n-1))
+            denom = a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n))
+            An = nom/denom
+
+            nom = a*(1 - q**n)*(1 - b*c*q**(n-1))\
+                *(1 - b*d*q**(n-1))*(1 - c*d*q**(n-1))
+            denom = (1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1))
+            Cn = nom/denom
+
+            Bn = (a + a**(-1) - An - Cn)
+
+            ldcoef = qPochhammerSymbol([a*b, a*c, a*d], q, n).evaluate() / a**n
+
+            result.append(ldcoef*An**(-1) * \
+                ((Bn - 2*x)*result[n-1] + Cn*result[n-2]))
+
+        return result
+            
     
 def little_q_Jacobi_polynomials(n, x, a, b, q):
     bhs = BasicHypergeometricSeries([q**(-n), a*b*q**(n+1)], [a*q], q, q*x)
