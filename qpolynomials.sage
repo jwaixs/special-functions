@@ -26,6 +26,19 @@ class Askey_Wilson_polynomials():
 
         return rec1, rec2, rec3
 
+    def three_term(self):
+        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+
+        An = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*\
+            (1 - a*b*c*d*q**(n-1)) / \
+            (a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
+        Cn = a*(1 - q**n)*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))*\
+            (1 - c*d*q**(n-1)) / \
+            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1)))
+        Bn = (a + a**(-1) - An - Cn)
+
+        return An, Bn, Cn
+
     def upto(self):
         result = [0, 1]
         endn, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
