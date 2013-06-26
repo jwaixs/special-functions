@@ -26,40 +26,46 @@ class Askey_Wilson_polynomials():
 
         return rec1, rec2, rec3
 
-    def three_term(self):
-        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+#    def three_term(self):
+#        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+#
+#        An = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*\
+#            (1 - a*b*c*d*q**(n-1)) / \
+#            (a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
+#        Cn = a*(1 - q**n)*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))*\
+#            (1 - c*d*q**(n-1)) / \
+#            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1)))
+#        Bn = (a + a**(-1) - An - Cn)
+#
+#        return An, Bn, Cn
 
-        An = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*\
-            (1 - a*b*c*d*q**(n-1)) / \
-            (a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
-        Cn = a*(1 - q**n)*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))*\
+    def three_term(self, n=None):
+        if n == None:
+            n = self.n
+        q, x, a, b, c, d = [self.q, self.x] + self.param
+        
+        An = (1 - a*b*c*d*q**(n-1)) \
+            / ((1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
+        Cn = (1 - q**n)*(1 - a*b*q**(n-1))*(1 - a*c*q**(n-1))* \
+            (1 - a*d*q**(n-1))*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))* \
             (1 - c*d*q**(n-1)) / \
             ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1)))
-        Bn = (a + a**(-1) - An - Cn)
+        s1, s2 = a + b + c + d, a**(-1) + b**(-1) + c**(-1) + d**(-1)
+        Bn = q**(n-1)*((1 + a*b*c*d*q**(2*n-1))*(s1*q + s2*a*b*c*d) \
+            - q**(n-1)*(1 + q)*a*b*c*d*(s1 + s2*q)) / \
+            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n)))
 
         return An, Bn, Cn
 
-    def upto(self):
+    def upto(self, endn):
         result = [0, 1]
-        endn, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+        q, x, a, b, c, d = [self.q, self.x] + self.param
 
-        for n in range(2, endn+1):
-            nom = (1 - a*b*q**n) * (1 - a*c*q**n) * (1 - a*d*q**n) \
-                * (1 - a*b*c*d*q**(n-1))
-            denom = a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n))
-            An = nom/denom
-
-            nom = a*(1 - q**n)*(1 - b*c*q**(n-1))\
-                *(1 - b*d*q**(n-1))*(1 - c*d*q**(n-1))
-            denom = (1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1))
-            Cn = nom/denom
-
-            Bn = (a + a**(-1) - An - Cn)
-
-            ldcoef = qPochhammerSymbol([a*b, a*c, a*d], q, n).evaluate() / a**n
-
-            result.append(ldcoef*An**(-1) * \
-                ((Bn - 2*x)*result[n-1] + Cn*result[n-2]))
+        for k in range(2, endn+1):
+            an, bn, cn = self.three_term(n=k)
+            result.append(
+                (2*x - bn)*an**(-1)*result[k-1] - an**(-1)*cn*result[k-2]
+            )
 
         return result
             
