@@ -9,7 +9,7 @@ class Askey_Wilson_polynomials():
         self.param = [a, b, c, d]
 
     def monic_three_term(self):
-        n, q, x, a, b, c, d = [self.n, self.x, self.q] + self.param
+        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
 
         nom = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*(1 - a*b*c*d*q**(n-1))
         denom = a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n))
@@ -25,6 +25,50 @@ class Askey_Wilson_polynomials():
         rec3 = 1/4*An.substitute({n : n-1})*Cn
 
         return rec1, rec2, rec3
+
+#    def three_term(self):
+#        n, q, x, a, b, c, d = [self.n, self.q, self.x] + self.param
+#
+#        An = (1 - a*b*q**n)*(1 - a*c*q**n)*(1 - a*d*q**n)*\
+#            (1 - a*b*c*d*q**(n-1)) / \
+#            (a*(1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
+#        Cn = a*(1 - q**n)*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))*\
+#            (1 - c*d*q**(n-1)) / \
+#            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1)))
+#        Bn = (a + a**(-1) - An - Cn)
+#
+#        return An, Bn, Cn
+
+    def three_term(self, n=None):
+        if n == None:
+            n = self.n
+        q, x, a, b, c, d = [self.q, self.x] + self.param
+        
+        An = (1 - a*b*c*d*q**(n-1)) \
+            / ((1 - a*b*c*d*q**(2*n-1))*(1 - a*b*c*d*q**(2*n)))
+        Cn = (1 - q**n)*(1 - a*b*q**(n-1))*(1 - a*c*q**(n-1))* \
+            (1 - a*d*q**(n-1))*(1 - b*c*q**(n-1))*(1 - b*d*q**(n-1))* \
+            (1 - c*d*q**(n-1)) / \
+            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n-1)))
+        s1, s2 = a + b + c + d, a**(-1) + b**(-1) + c**(-1) + d**(-1)
+        Bn = q**(n-1)*((1 + a*b*c*d*q**(2*n-1))*(s1*q + s2*a*b*c*d) \
+            - q**(n-1)*(1 + q)*a*b*c*d*(s1 + s2*q)) / \
+            ((1 - a*b*c*d*q**(2*n-2))*(1 - a*b*c*d*q**(2*n)))
+
+        return An, Bn, Cn
+
+    def upto(self, endn):
+        result = [0, 1]
+        q, x, a, b, c, d = [self.q, self.x] + self.param
+
+        for k in range(2, endn+1):
+            an, bn, cn = self.three_term(n=k)
+            result.append(
+                (2*x - bn)*an**(-1)*result[k-1] - an**(-1)*cn*result[k-2]
+            )
+
+        return result
+            
     
 def little_q_Jacobi_polynomials(n, x, a, b, q):
     bhs = BasicHypergeometricSeries([q**(-n), a*b*q**(n+1)], [a*q], q, q*x)

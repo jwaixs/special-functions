@@ -114,4 +114,14 @@ def cgc(l1, l2, l, p, n):
     else:
         return 0
 
-    return line1 * line2 * line3
+    return line12 * line3
+
+def cgc_test(l, n):
+    q = var('q')
+    return (-1)**n * q**(4*l - 2*n) \
+        * sqrt((1 - q**4)*(1 - q**(2*n+2))/((1 - q**(4*l+2))*(1 - q**(4*l+4))))
+
+def cgc_test2(l, n):
+    q = var('q')
+    return (-1)**n * q**(2*l - n) \
+        * sqrt((1 - q**4)*(1 - q**(4*l - 2*n + 2))/((1 - q**(4*l+2))*(1 - q**(4*l+4))))
