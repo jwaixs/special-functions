@@ -151,6 +151,30 @@ def Phi0(l, simplify=False):
             lambda elm : maple(elm).simplify().sage())
     return matrix(lmatrix).transpose()
 
+def phi_star_vec(l, l1, l2):
+    z = var('z')
+    ret = []
+
+    for n in srange(-l, l+1):
+        elm = 0
+        for n1 in srange(-l1, l1+1):
+            n2 = n1 - n
+            elm += cgc(l1, l2, l, n1, n2, n)**2 * q**(n1+n2) * z**(n1+n2)
+        ret.append(elm)
+
+    return ret
+
+def Phi0_star(l, simplify=False):
+    lmatrix = []
+    
+    for k in srange(-l, l+1):
+        lmatrix.append(phi_star_vec(l, (l+k)/2, (l-k)/2))
+
+    if simplify:
+        return matrix(lmatrix).transpose().apply_map(
+            lambda elm : maple(elm).simplify().sage())
+    return matrix(lmatrix).transpose()
+
 # Explicit computations
 def f(z):
     q = var('q')
@@ -174,25 +198,23 @@ def matN(l, i):
     q, z = var('q z')
     
     NN = matrix(SR, 2*l+1, 2*l+1)
-    print NN
 
     if i == 1:
         for n in srange(-l, l+1):
-            print n+l, n+l
             NN[n+l, n+l] = q**n * f(z**(-1)) \
-                + z * q**(1 - n) * (cc(l,n) + bb(l,n))
+                + q*z*q**(-n) * (cc(l,n) + bb(l,n)) \
+		/ ((1 - z**2)*(z - z**(-1)))
         for n in srange(-l, l):
-            print n+l, n+l+1
-            NN[n+l, n+l+1] = -q**(1 - n) * cc(l, n) \
+            NN[n+l, n+l+1] = -q**2*q**(-n-1) * cc(l, n) \
                 / ((1 - z**2)*(z - z**(-1)))
         for n in srange(-l+1, l+1):
-            print n+l, n+l-1
-            NN[n+l, n+l-1] = -q**(1 - n) * z**2 * bb(l, n) \
+            NN[n+l, n+l-1] = -q * z**2 * q**(-n) * bb(l, n) \
                 / ((1 - z**2)*(z - z**(-1)))
     elif i == 2:
         for n in srange(-l, l+1):
             NN[n+l, n+l] = q**(-n) * f(z**(-1)) \
-                + z*q**(1+n) * (cc(l, n) + bb(l, n))
+                + z*q**(1+n) * (cc(l, n) + bb(l, n)) \
+		/ ((1 - z**2)*(z - z**(-1)))
         for n in srange(-l, l-1):
             NN[n+l, n+l+1] = -q**(1 + n) * z**2 * cc(l, n) \
                 / ((1 - z**2)*(z - z**(-1)))
@@ -236,4 +258,21 @@ def matE(l):
             Y[2*l+1-i-1, i] = -1
             Y[2*l+1-i-1, 2*l+1-i-1] = 1
 
-    return sqrt(2)*Y
+    return 1/sqrt(2)*Y
+
+def sage2maple(m):
+	print 'Matrix(['
+	
+	height = len(m.columns())
+	width = len(m.rows())
+
+	for i in range(height):
+		print '[',
+		for j in range(width):
+			if j != width - 1:
+				print '%s,' % m[i,j], 
+			else:
+				print m[i,j],
+		print '],'
+
+	print ']);'
