@@ -172,6 +172,9 @@ class qPochhammerSymbol():
         else:
             return 0
 
+def qpoch(la, q, n):
+    return qPochhammerSymbol(la, q, n).evaluate()
+
 class BasicHypergeometricSeries():
     """
     An implementation of the Basic Hypergeometric Series.
@@ -373,3 +376,6 @@ class BasicHypergeometricSeries():
 
         """
         return sum(list(self))
+
+def bhs(la, lb, q, z):
+    return BasicHypergeometricSeries(la, lb, q, z).evaluate()
