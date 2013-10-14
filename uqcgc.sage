@@ -140,10 +140,100 @@ def phi_vec(l, l1, l2):
 
     return ret
 
-def Phi0(l):
+def Phi0(l, simplify=False):
     lmatrix = []
     
     for k in srange(-l, l+1):
         lmatrix.append(phi_vec(l, (l+k)/2, (l-k)/2))
 
+    if simplify:
+        return matrix(lmatrix).transpose().apply_map(
+            lambda elm : maple(elm).simplify().sage())
     return matrix(lmatrix).transpose()
+
+# Explicit computations
+def f(z):
+    q = var('q')
+    return (1 - q**2*z**2) / ((1 - z**2) * (q - q**(-1))**2)
+
+def cc(l, n):
+    '''Squared!'''
+    q = var('q')
+
+    return (q**(n - l) - q**(l - n))*(q**(-l - n - 1) - q**(l + n + 1)) \
+        / (q**(-1) - q)**2
+
+def bb(l, n):
+    '''Squared!'''
+    q = var('q')
+
+    return (q**(-l + n - 1) - q**(l - n + 1))*(q**(-l - n) - q**(l + n)) \
+        / (q**(-1) - q)**2
+
+def matN(l, i):
+    q, z = var('q z')
+    
+    NN = matrix(SR, 2*l+1, 2*l+1)
+    print NN
+
+    if i == 1:
+        for n in srange(-l, l+1):
+            print n+l, n+l
+            NN[n+l, n+l] = q**n * f(z**(-1)) \
+                + z * q**(1 - n) * (cc(l,n) + bb(l,n))
+        for n in srange(-l, l):
+            print n+l, n+l+1
+            NN[n+l, n+l+1] = -q**(1 - n) * cc(l, n) \
+                / ((1 - z**2)*(z - z**(-1)))
+        for n in srange(-l+1, l+1):
+            print n+l, n+l-1
+            NN[n+l, n+l-1] = -q**(1 - n) * z**2 * bb(l, n) \
+                / ((1 - z**2)*(z - z**(-1)))
+    elif i == 2:
+        for n in srange(-l, l+1):
+            NN[n+l, n+l] = q**(-n) * f(z**(-1)) \
+                + z*q**(1+n) * (cc(l, n) + bb(l, n))
+        for n in srange(-l, l-1):
+            NN[n+l, n+l+1] = -q**(1 + n) * z**2 * cc(l, n) \
+                / ((1 - z**2)*(z - z**(-1)))
+        for n in srange(-l+1, l):
+            NN[n+l, n+l] = -q**(1 + n) * bb(l, n) \
+                / ((1 - z**2)*(z - z**(-1)))
+
+    return NN
+
+def matM(l, i):
+    q, z = var('q z')
+
+    MM = matrix(SR, 2*l+1, 2*l+1)
+
+    if i == 1:
+        for n in srange(-l, l+1):
+            MM[n+l, n+l] = q**(-n) * f(z)
+    elif i == 2:
+        for n in srange(-l, l+1):
+            MM[n+l, n+l] = q**(n) * f(z)
+
+    return MM
+
+def MapleSimplifyMatrix(mat):
+    return mat.apply_map(lambda elm : maple(elm).simplify().sage())
+
+def matE(l):
+    Y = matrix(SR, 2*l+1, 2*l+1)
+
+    if l in ZZ:
+        for i in srange(l):
+            Y[i,i] = 1
+            Y[i, 2*l+1-i-1] = 1
+            Y[2*l+1-i-1, i] = -1
+            Y[2*l+1-i-1, 2*l+1-i-1] = 1
+        Y[l,l] = sqrt(2)
+    else:
+        for i in srange(l+1/2):
+            Y[i,i] = 1
+            Y[i, 2*l+1-i-1] = 1
+            Y[2*l+1-i-1, i] = -1
+            Y[2*l+1-i-1, 2*l+1-i-1] = 1
+
+    return sqrt(2)*Y
