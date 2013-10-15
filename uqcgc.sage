@@ -1,28 +1,6 @@
 from basichypergeometric import qpoch, bhs
 from qpolynomials import dual_q_Hahn_polynomials
 
-def product(ll):
-    if len(ll) == 0:
-        return 1
-    return ll.pop()*product(ll)
-
-def qpochhammer(a, qq, n):
-    if type(a) == list:
-        return product(map(lambda elm : qpochhammer(elm, qq, n)), a)
-    if n == 0:
-        return 1
-    return (1 - a*qq**(n-1))*qpochhammer(a, qq, n-1)
-
-def basichypergeometric32(la, lb, qq, z, n=0):
-    if n == 0:
-        return 1 + basichypergeometric32(la, lb, qq, z, 1)
-
-    nom = qpochhammer(la, qq, n)
-    denom = qpochhammer(lb + [qq], qq, n)
- 
-    if nom == 0:
-        return 0
-    return nom/denom*z**n + basichypergeometric32(a, b, c, d, e, qq, z, n+1)
 
 def cgc(l1, l2, l, i, j, k):
     if i - j != k or i < -l1 or i > l1 or j < -l2 or j > l2:
@@ -276,3 +254,30 @@ def sage2maple(m):
 		print '],'
 
 	print ']);'
+
+def replace_z_x(polynomial):
+    q, z, x = var('q z x')
+
+    ret_poly = 0
+
+    while polynomial != 0:
+        coef = polynomial.coefficients(z)
+
+        if len(coef) == 1:
+            if coef[0][1] != 0:
+                return None
+            return expand(ret_poly + polynomial)
+
+        first, last = coef[0], coef[-1]
+
+        if not (first[0] == last[0] and first[1] == -last[1]):
+            return None
+        
+        ret_poly += first[0]*(2*x)**(last[1])
+        polynomial -= first[0]*(z + z**(-1))**(last[1])
+
+def Weight(l):
+    phi0 = Phi0(l)
+    phi0_star = Phi0_star(l)
+    weight = phi0*phi0_star.substitute({z : q**(-2)*z})
+    return weight
