@@ -3,7 +3,7 @@ from qpolynomials import dual_q_Hahn_polynomials
 
 
 def cgc(l1, l2, l, i, j, k):
-    if i - j != k or i < -l1 or i > l1 or j < -l2 or j > l2:
+    if i - j != k or i < -l1 or i > l1 or j < -l2 or j > l2 or k < -l or k > l:
         return 0
 
     if l2 > l1:
@@ -31,7 +31,7 @@ def cgc(l1, l2, l, i, j, k):
         qpoch4 = qpoch(
             [q**2, q**(-4*l1+2*p), q**(-4*l2)],
             q**2, l1 + l2 - l)
-        line1 = sqrt(qpoch1 * qpoch2 / (qpoch3 * qpoch4))
+        line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
         line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
             / (1 - q**(-4*l1 - 4*l2 - 2))) \
@@ -50,7 +50,7 @@ def cgc(l1, l2, l, i, j, k):
    
  
     elif 0 <= p and p <= 2*l1 - 2*l2:
-        # Case 2 and case 3
+        # Case 2
         qpoch1 = qpoch(q**(-4*l2 - 2*p), q**2, 2*l2)
         qpoch2 = qpoch(
             [q**(-4*l1 + 2*p), q**(-4*l1 - 4*l2 - 2), q**(-4*l2)], 
@@ -61,7 +61,7 @@ def cgc(l1, l2, l, i, j, k):
             [q**2, q**(-4*l1), q**(-4*l2 - 2*p)], 
             q**2,
             l1 + l2 - l)
-        line1 = sqrt(qpoch1 * qpoch2 / (qpoch3 * qpoch4))
+        line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
 
         line2 = sqrt((1 - q**(-4*l - 2)) / (1 - q**(-4*l1 - 4*l2 - 2))) \
@@ -80,22 +80,47 @@ def cgc(l1, l2, l, i, j, k):
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
     elif 2*l1 - 2*l2 < p and p <= 2*l1:
         # Case 3
-        qpoch1 = qpoch(q**(-4*l1), q**2, 2*l1-p)
-        qpoch2 = qpoch(
-            [q**(-4*l2), q**(-4*l1-4*l2-2), q**(-4*l1-2*p)],
+        #qpoch1 = qpoch(q**(-4*l1), q**2, 2*l1-p)
+        #qpoch2 = qpoch(
+        #    [q**(-4*l2), q**(-4*l1-4*l2-2), q**(-4*l1+2*p)],
+        #    q**2, l1 + l2 - l)
+        #qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l1 - p)
+        #qpoch4 = qpoch(
+        #    [q**2, q**(-2*l1-4*l2-2*p), q**(-4*l1)],
+        #    q**2, l1 + l2 - l)
+        #line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
+
+        #line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
+        #    / (1 - q**(-4*l1 - 4*l2 - 2))) \
+        #    * q**(-2*l2*(2*l1-p) + p*(l1+l2-l) - binomial(l1 + l2 - l, 2))
+
+        #qpoch5 = qpoch([q**(-4*l2), q**(-4*l1+2*p)], q**2, n)
+        #qpoch6 = qpoch([q**2, q**(2*p + 2)], q**2, n)
+        #poly = bhs(
+        #    [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
+        #    [q**(-4*l1+2*p), q**(-4*l2)], q**2, q**2)
+        #line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
+        
+        qpoch1 = qpoch(q**(-4*l2), q**2, 2*l2-p)
+        qpoch2 = qpoch( 
+            [q**(-4*l1), q**(-4*l1-4*l2-2), q**(-4*l2+2*p)],
             q**2, l1 + l2 - l)
-        qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l1 - p)
+        qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l2 - p)
         qpoch4 = qpoch(
-            [q**2, q**(-2*l1-4*l2-2*p), q**(-4*l1)],
+            [q**2, q**(-4*l1-2*p), q**(-4*l2)],
             q**2, l1 + l2 - l)
-        line1 = sqrt(qpoch1 * qpoch2 / (qpoch3 * qpoch4))
+        line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
         line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
             / (1 - q**(-4*l1 - 4*l2 - 2))) \
-            * q**(-2*l2*(2*l1-p) + p*(l1+l2-l) - binomial(l1 + l2 - l, 2))
+            * q**(-2*l1*(2*l2-p) + (l1+l2-l)*(2*l1+2*l2-p) \
+            - binomial(l1 + l2 - l, 2))
 
-        qpoch5 = qpoch([q**(-4*l2), q**(-4*l1+2*p)], q**2, n)
-        qpoch6 = qpoch([q**2, q**(2*p + 2)], q**2, n)
+        qpoch5 = qpoch(
+            [q**(-4*l2+2*p), q**(-4*l1)],
+            q**2, n)
+        qpoch6 = qpoch(
+            [q**2, q**(2*p + 2)], q**2, n)
         poly = bhs(
             [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
             [q**(-4*l1+2*p), q**(-4*l2)], q**2, q**2)
@@ -217,6 +242,9 @@ def matM(l, i):
     return MM
 
 def MapleSimplifyMatrix(mat):
+    # First apply maxima
+    mat = mat.apply_map(lambda elm : elm.simplify())
+    # Then Maple
     return mat.apply_map(lambda elm : maple(elm).simplify().sage())
 
 def matE(l):
@@ -276,8 +304,198 @@ def replace_z_x(polynomial):
         ret_poly += first[0]*(2*x)**(last[1])
         polynomial -= first[0]*(z + z**(-1))**(last[1])
 
-def Weight(l):
+    return ret_poly
+
+def Weight(l, simpl=True):
     phi0 = Phi0(l)
     phi0_star = Phi0_star(l)
     weight = phi0*phi0_star.substitute({z : q**(-2)*z})
+    assume(q > 0)
+    assume(z > 0)
+    weight = weight.apply_map(lambda elm : elm.simplify())
+
+    if simpl:
+        weight = MapleSimplifyMatrix(weight)
+
+    weight = weight.apply_map(lambda elm : replace_z_x(elm))
+
+    if simpl:
+        return MapleSimplifyMatrix(weight)
     return weight
+
+def Triangulize(M):
+    l = (len(M.rows()) - 1)/2
+    E = matE(l)
+    return E*M*E.transpose()
+
+def WeightsFromTo(m, n, NUM_CORES=12):
+    ret = {}
+    
+    @parallel(NUM_CORES)
+    def par_weight(l):
+        l = l/2
+        simpl = True
+        phi0 = Phi0(l)
+        phi0_star = Phi0_star(l)
+        weight = phi0*phi0_star.substitute({z : q**(-2)*z})
+        assume(q > 0)
+        assume(z > 0)
+        weight = weight.apply_map(lambda elm : elm.simplify())
+    
+        if simpl:
+            weight = MapleSimplifyMatrix(weight)
+ 
+        weight = weight.apply_map(lambda elm : replace_z_x(elm))
+    
+        if simpl:
+            return MapleSimplifyMatrix(weight)
+        return weight
+
+    gen = par_weight(range(m, n))
+    for rec in gen:
+        print 'Computing weight', rec[0][0][0]/2
+        ret[rec[0][0][0]] = rec[1]
+
+    return ret
+
+def baseChebychev_U(poly):
+    deg = poly.degree(x)
+    ret = []
+
+    while poly != 0:
+       pass 
+
+
+# Three term recurrence relation
+
+def aa(l1, l2, m1, m2, l):
+    ret = 0
+
+    for j1 in srange(-l1, l1+1):
+        for j2 in srange(-l2, l2+1):
+            j = j1 - j2
+            for i1 in [-1/2, 1/2]:
+                i2 = i1
+                n1 = j1 - i1
+                n2 = j2 - i2
+                if n1 - n2 == l and n1 in srange(-m1, m1+1) and n2 in srange(-m2, m2+1):
+                    ret += cgc(l1, l2, l, j1, j2, j) \
+                        * cgc(1/2, 1/2, 0, i1, i2, 0) \
+                        * cgc(l1, 1/2, m1, j1, i1, n1) \
+                        * cgc(l2, 1/2, m2, j2, i2, n2) \
+                        * cgc(m1, m2, l, n1, n2, l)
+
+    return ret
+
+def zeta(l, d, k):
+    return (d + l + k)/2, (d + l - k)/2
+
+def Ad(l, d):
+    ret = matrix(SR, 2*l+1, 2*l+1)
+
+    for k in srange(-l, l+1):
+        l1, l2 = zeta(l, d, k)
+        m1, m2 = zeta(l, d+1, k)
+        ret[l+k, l+k] = aa(l1, l2, m1, m2, l)**2
+
+    return ret
+
+def Bd(l, d):
+    ret = matrix(SR, 2*l+1, 2*l+1)
+
+    for k in srange(-l, l):
+        l1, l2 = zeta(l, d, k)
+        m1, m2 = zeta(l, d, k+1)
+        ret[l+k, l+k+1] = aa(l1, l2, m1, m2, l)**2
+
+    for k in srange(-l+1, l+1):
+        l1, l2 = zeta(l, d, k)
+        m1, m2 = zeta(l, d, k-1)
+        ret[l+k, l+k-1] = aa(l1, l2, m1, m2, l)**2
+
+    return ret
+
+def Cd(l, d):
+    ret = matrix(SR, 2*l+1, 2*l+1)
+
+    for k in srange(-l, l+1):
+        l1, l2 = zeta(l, d, k)
+        m1, m2 = zeta(l, d-1, k)
+        ret[l+k, l+k] = aa(l1, l2, m1, m2, l)**2
+
+    return ret
+
+def try_poly_3():
+    print 'Compute P0'
+    P0 = identity_matrix(SR, 3)
+
+    print 'Compute P1'
+    A0, B0, C0 = Ad(1, 0), Bd(1, 0), Cd(1, 0)
+    P1 = (A0**(-1) * B0 - x * A0**(-1)) * P0
+
+    print 'Compute P2'
+    A1, B1, C1 = Ad(1, 1), Bd(1, 1), Cd(1, 1)
+    P2 = (A1**(-1) * B1 - x * A1**(-1)) * P1 + A1**(-1) * C1 * P0
+
+    print 'Compute P3'
+    A2, B2, C2 = Ad(1, 2), Bd(1, 2), Cd(1, 2)
+    P3 = (A2**(-1) * B2 - x * A2**(-1)) * P2 + A2**(-1) * C2 * P1
+
+    return P0, P1, P2, P3
+
+def try_poly_2():
+    print 'Compute P0'
+    P0 = identity_matrix(SR, 2)
+
+    print 'Compute p1'
+    A0, B0, C0 = Ad(1/2, 0), Bd(1/2, 0), Cd(1/2, 0)
+    P1 = (A0**(-1) * B0 - x * A0**(-1)) * P0
+
+    return P0, P1
+
+def Ea3(l1, l2):
+    q, z = var('q z')
+
+    M = matrix(SR, [
+        [cgc(0, 1, 1, 0, 1, -1)**2 * q**(-1)*z**(-1), cgc(1/2, 1/2, 1, -1/2, 1/2, -1)**2, cgc(1, 0, 1, -1, 0, -1)**2*q*z],
+        [cgc(0, 1, 1, 0, 0, 0)**2, cgc(1/2, 1/2, 1, 1/2, 1/2, 0)**2 * q**(-1)*z**(-1) + cgc(1/2, 1/2, 1, -1/2, -1/2, 0)**2 * q*z, cgc(1, 0, 1, 0, 0, 0)**2],
+        [cgc(0, 1, 1, 0, -1, 1)**2 * q*z, cgc(1/2, 1/2, 1, 1/2, -1/2, 1)**2, cgc(1, 0, 1, 1, 0, 1)**2 * q**(-1)*z**(-1)]])
+   
+    a1, a2, a3 = 0, 0, 0
+
+    for n1 in srange(-l1, l1+1):
+        for n2 in srange(-l2, l2+1):
+            a1 += cgc(l1, l2, 1, n1, n2, -1)**2 * q**(-n1-n2)*z**(-n1-n2)
+            a2 += cgc(l1, l2, 1, n1, n2, 0)**2 * q**(-n1-n2)*z**(-n1-n2)
+            a3 += cgc(l1, l2, 1, n1, n2, 1)**2 * q**(-n1-n2)*z**(-n1-n2)
+
+    N = matrix(SR, [[a1], [a2], [a3]])
+    
+    return M**(-1)*N
+
+def Qd3(d):
+    ret = matrix(SR, 3, 3)
+
+    l1, l2 = zeta(1, d, -1)
+    vec = Ea3(l1, l2)
+    q1, q2, q3 = vec[0,0], vec[1,0], vec[2,0]
+    ret[0,0] = q1
+    ret[1,0] = q2
+    ret[2,0] = q3
+
+    l1, l2 = zeta(1, d, 0)
+    vec = Ea3(l1, l2)
+    q1, q2, q3 = vec[0,0], vec[1,0], vec[2,0]
+    ret[0,1] = q1
+    ret[1,1] = q2
+    ret[2,1] = q3
+
+    l1, l2 = zeta(1, d, 1)
+    vec = Ea3(l1, l2)
+    q1, q2, q3 = vec[0,0], vec[1,0], vec[2,0]
+    ret[0,2] = q1
+    ret[1,2] = q2
+    ret[2,2] = q3
+
+    return ret
+
