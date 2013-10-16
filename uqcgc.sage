@@ -23,6 +23,7 @@ def cgc(l1, l2, l, i, j, k):
 
     if -2*l2 <= p and p < 0:
         # Case 1
+        #print 'case 1'
         qpoch1 = qpoch(q**(-4*l2), q**2, 2*l2+p)
         qpoch2 = qpoch( 
             [q**(-4*l1), q**(-4*l1-4*l2-2), q**(-4*l2-2*p)],
@@ -33,7 +34,7 @@ def cgc(l1, l2, l, i, j, k):
             q**2, l1 + l2 - l)
         line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
-        line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
+        line2 = sqrt((1 - q**(-4*l-2)) \
             / (1 - q**(-4*l1 - 4*l2 - 2))) \
             * q**(-2*l1*(2*l2+p) + (l1+l2-l)*(2*l1+2*l2+p) \
             - binomial(l1 + l2 - l, 2))
@@ -43,14 +44,18 @@ def cgc(l1, l2, l, i, j, k):
             q**2, n)
         qpoch6 = qpoch(
             [q**2, q**(-2*p + 2)], q**2, n)
-        poly = bhs(
-            [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
-            [q**(-4*l1), q**(-4*l2-2*p)], q**2, q**2)
+        #poly = bhs(
+        #    [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
+        #    [q**(-4*l1), q**(-4*l2-2*p)], q**2, q**2)
+        poly = dual_q_Hahn_polynomials(
+            n, l1+l2-l, q**(-4*l1-2), q**(-4*l2-2), 2*l2+p, q**2
+        )
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
    
  
     elif 0 <= p and p <= 2*l1 - 2*l2:
         # Case 2
+        #print 'case 2'
         qpoch1 = qpoch(q**(-4*l2 - 2*p), q**2, 2*l2)
         qpoch2 = qpoch(
             [q**(-4*l1 + 2*p), q**(-4*l1 - 4*l2 - 2), q**(-4*l2)], 
@@ -80,55 +85,65 @@ def cgc(l1, l2, l, i, j, k):
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
     elif 2*l1 - 2*l2 < p and p <= 2*l1:
         # Case 3
-        #qpoch1 = qpoch(q**(-4*l1), q**2, 2*l1-p)
-        #qpoch2 = qpoch(
-        #    [q**(-4*l2), q**(-4*l1-4*l2-2), q**(-4*l1+2*p)],
-        #    q**2, l1 + l2 - l)
-        #qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l1 - p)
-        #qpoch4 = qpoch(
-        #    [q**2, q**(-2*l1-4*l2-2*p), q**(-4*l1)],
-        #    q**2, l1 + l2 - l)
-        #line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
-
-        #line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
-        #    / (1 - q**(-4*l1 - 4*l2 - 2))) \
-        #    * q**(-2*l2*(2*l1-p) + p*(l1+l2-l) - binomial(l1 + l2 - l, 2))
-
-        #qpoch5 = qpoch([q**(-4*l2), q**(-4*l1+2*p)], q**2, n)
-        #qpoch6 = qpoch([q**2, q**(2*p + 2)], q**2, n)
-        #poly = bhs(
-        #    [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
-        #    [q**(-4*l1+2*p), q**(-4*l2)], q**2, q**2)
-        #line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
-        
-        qpoch1 = qpoch(q**(-4*l2), q**2, 2*l2-p)
-        qpoch2 = qpoch( 
-            [q**(-4*l1), q**(-4*l1-4*l2-2), q**(-4*l2+2*p)],
+        #print 'case 3'
+        qpoch1 = qpoch(q**(-4*l1), q**2, 2*l1-p)
+        qpoch2 = qpoch(
+            [q**(-4*l2), q**(-4*l1-4*l2-2), q**(-4*l1+2*p)],
             q**2, l1 + l2 - l)
-        qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l2 - p)
+        qpoch3 = qpoch(q**(-4*l1 - 4*l2), q**2, 2*l1 - p)
         qpoch4 = qpoch(
-            [q**2, q**(-4*l1-2*p), q**(-4*l2)],
+            [q**2, q**(-4*l2-2*p), q**(-4*l1)],
             q**2, l1 + l2 - l)
         line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
-        line2 = sqrt((1 - q**(-2*l1-2*l2-2*l-2)) \
-            / (1 - q**(-4*l1 - 4*l2 - 2))) \
-            * q**(-2*l1*(2*l2-p) + (l1+l2-l)*(2*l1+2*l2-p) \
-            - binomial(l1 + l2 - l, 2))
+        line2 = sqrt((1 - q**(-4*l-2)) / (1 - q**(-4*l1 - 4*l2 - 2))) \
+            * q**(-2*l2*(2*l1-p) + (2*l1+2*l2-p)*(l1+l2-l) - binomial(l1 + l2 - l, 2))
 
-        qpoch5 = qpoch(
-            [q**(-4*l2+2*p), q**(-4*l1)],
-            q**2, n)
-        qpoch6 = qpoch(
-            [q**2, q**(2*p + 2)], q**2, n)
-        poly = bhs(
-            [q**(-2*n), q**(-2*l1-2*l2+2*l), q**(-2*l1-2*l2-2*l-2)],
-            [q**(-4*l1+2*p), q**(-4*l2)], q**2, q**2)
+        qpoch5 = qpoch([q**(-4*l2), q**(-4*l1+2*p)], q**2, n)
+        qpoch6 = qpoch([q**2, q**(2*p + 2)], q**2, n)
+        poly = dual_q_Hahn_polynomials(
+            n, l1+l2-l, q**(-4*l2-2), q**(-4*l1-2), 2*l1-p, q**2
+        )
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
+        
     else:
         return 0
 
     return line1 * line2 * line3
+
+def test_cgc(l1, l2):
+    from itertools import product
+
+    # test 1
+    for n1, m1 in product(srange(-l1, l1+1), repeat=2):
+        for n2, m2 in product(srange(-l2, l2+1), repeat=2):
+            s = 0
+            for l in srange(abs(l1-l2), l1+l2+1):
+                for n in srange(-l, l+1):
+                    s += cgc(l1, l2, l, n1, n2, n) \
+                        * cgc(l1, l2, l, m1, m2, n)
+            if bool(s != kronecker_delta(n1, m1)*kronecker_delta(n2, m2)):
+                for l in srange(abs(l1-l2), l1+l2+1):
+                    for n in srange(-l, l+1):
+                        ret = cgc(l1, l2, l, n1, n2, n) * cgc(l1, l2, l, m1, m2, n)
+                        if ret != 0:
+                            print l1, l2, l, n1, n2, n
+                            print l1, l2, l, m1, m2, n
+                            print cgc(l1, l2, l, n1, n2, n) * cgc(l1, l2, l, m1, m2, n)
+                return False, 1, n1, n2, m1, m2, s
+            print '.',
+
+    # test 2
+    for l, ll in product(srange(abs(l1-l2), l1+l2+1), repeat=2):
+        for n, m in product(srange(-l, l+1), srange(-ll, ll+1)):
+            s = 0
+            for n1, n2 in product(srange(-l1, l1+1), srange(-l2, l2+1)):
+                s += cgc(l1, l2, l, n1, n2, n)*cgc(l1, l2, ll, n1, n2, m)
+            if bool(s != kronecker_delta(l, ll)*kronecker_delta(n, m)):
+                return False, 2, l, ll, n, m, s
+            print '.',
+
+    return True
 
 def phi_vec(l, l1, l2):
     z = var('z')
