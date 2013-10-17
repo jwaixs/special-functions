@@ -1,6 +1,6 @@
 from basichypergeometric import qpoch, bhs
 from qpolynomials import dual_q_Hahn_polynomials
-
+import sys
 
 def cgc(l1, l2, l, i, j, k):
     if i - j != k or i < -l1 or i > l1 or j < -l2 or j > l2 or k < -l or k > l:
@@ -131,7 +131,8 @@ def test_cgc(l1, l2):
                             print l1, l2, l, m1, m2, n
                             print cgc(l1, l2, l, n1, n2, n) * cgc(l1, l2, l, m1, m2, n)
                 return False, 1, n1, n2, m1, m2, s
-            print '.',
+            sys.stdout.write('.')
+            sys.stdout.flush()
 
     # test 2
     for l, ll in product(srange(abs(l1-l2), l1+l2+1), repeat=2):
@@ -141,7 +142,8 @@ def test_cgc(l1, l2):
                 s += cgc(l1, l2, l, n1, n2, n)*cgc(l1, l2, ll, n1, n2, m)
             if bool(s != kronecker_delta(l, ll)*kronecker_delta(n, m)):
                 return False, 2, l, ll, n, m, s
-            print '.',
+            sys.stdout.write('.')
+            sys.stdout.flush()
 
     return True
 
@@ -321,10 +323,10 @@ def replace_z_x(polynomial):
 
     return ret_poly
 
-def Weight(l, simpl=True):
+def Weight(l, simpl=True, replace=True):
     phi0 = Phi0(l)
     phi0_star = Phi0_star(l)
-    weight = phi0*phi0_star.substitute({z : q**(-2)*z})
+    weight = phi0_star.substitute({z : q**(-2)*z})*phi0
     assume(q > 0)
     assume(z > 0)
     weight = weight.apply_map(lambda elm : elm.simplify())
@@ -332,7 +334,8 @@ def Weight(l, simpl=True):
     if simpl:
         weight = MapleSimplifyMatrix(weight)
 
-    weight = weight.apply_map(lambda elm : replace_z_x(elm))
+    if replace:
+        weight = weight.apply_map(lambda elm : replace_z_x(elm))
 
     if simpl:
         return MapleSimplifyMatrix(weight)
@@ -343,7 +346,7 @@ def Triangulize(M):
     E = matE(l)
     return E*M*E.transpose()
 
-def WeightsFromTo(m, n, NUM_CORES=12):
+def WeightsFromTo(m, n, file_name='weights.pkl', NUM_CORES=12):
     ret = {}
     
     @parallel(NUM_CORES)
@@ -360,7 +363,7 @@ def WeightsFromTo(m, n, NUM_CORES=12):
         if simpl:
             weight = MapleSimplifyMatrix(weight)
  
-        weight = weight.apply_map(lambda elm : replace_z_x(elm))
+        #weight = weight.apply_map(lambda elm : replace_z_x(elm))
     
         if simpl:
             return MapleSimplifyMatrix(weight)
@@ -370,6 +373,7 @@ def WeightsFromTo(m, n, NUM_CORES=12):
     for rec in gen:
         print 'Computing weight', rec[0][0][0]/2
         ret[rec[0][0][0]] = rec[1]
+        save(rec, 'weights')
 
     return ret
 
