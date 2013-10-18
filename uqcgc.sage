@@ -264,6 +264,15 @@ def MapleSimplifyMatrix(mat):
     # Then Maple
     return mat.apply_map(lambda elm : maple(elm).simplify().sage())
 
+def SageSimplifyMatrix(mat, do_fac=True):
+    def fsimplify(elm):
+        elm = elm.full_simplify()
+        if do_fac and elm != 0:
+            elm = elm.factor()
+        return elm
+
+    return mat.apply_map(fsimplify)
+
 def matE(l):
     Y = matrix(SR, 2*l+1, 2*l+1)
 
@@ -323,7 +332,7 @@ def replace_z_x(polynomial):
 
     return ret_poly
 
-def Weight(l, simpl=True, replace=True):
+def Weight(l, simplify_algorithm='sage', replace=True):
     phi0 = Phi0(l)
     phi0_star = Phi0_star(l)
     weight = phi0_star.substitute({z : q**(-2)*z})*phi0
@@ -331,14 +340,19 @@ def Weight(l, simpl=True, replace=True):
     assume(z > 0)
     weight = weight.apply_map(lambda elm : elm.simplify())
 
-    if simpl:
+    if simplify_algorithm == 'maple':
         weight = MapleSimplifyMatrix(weight)
+    elif simplify_algorithm == 'sage':
+        weight = SageSimplifyMatrix(weight)
 
     if replace:
         weight = weight.apply_map(lambda elm : replace_z_x(elm))
 
-    if simpl:
-        return MapleSimplifyMatrix(weight)
+    if simplify_algorithm == 'maple':
+        weight = MapleSimplifyMatrix(weight)
+    elif simplify_algorithm == 'sage':
+        weight = SageSimplifyMatrix(weight)
+
     return weight
 
 def Triangulize(M):
@@ -351,23 +365,7 @@ def WeightsFromTo(m, n, file_name='weights.pkl', NUM_CORES=12):
     
     @parallel(NUM_CORES)
     def par_weight(l):
-        l = l/2
-        simpl = True
-        phi0 = Phi0(l)
-        phi0_star = Phi0_star(l)
-        weight = phi0*phi0_star.substitute({z : q**(-2)*z})
-        assume(q > 0)
-        assume(z > 0)
-        weight = weight.apply_map(lambda elm : elm.simplify())
-    
-        if simpl:
-            weight = MapleSimplifyMatrix(weight)
- 
-        #weight = weight.apply_map(lambda elm : replace_z_x(elm))
-    
-        if simpl:
-            return MapleSimplifyMatrix(weight)
-        return weight
+        return Weight(l, replace=False)
 
     gen = par_weight(range(m, n))
     for rec in gen:
