@@ -173,6 +173,8 @@ class qPochhammerSymbol():
             return 0
 
 def qpoch(la, q, n):
+    if n == 0:
+        return 1
     return qPochhammerSymbol(la, q, n).evaluate()
 
 class BasicHypergeometricSeries():

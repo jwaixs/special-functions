@@ -314,13 +314,17 @@ def replace_z_x(polynomial):
 
     ret_poly = 0
 
-    while polynomial != 0:
+    while polynomial.full_simplify() != 0:
         coef = polynomial.coefficients(z)
+        coef = [ c for c in coef if c[0] != 0 ]
 
-        if len(coef) == 1:
-            if coef[0][1] != 0:
-                return None
-            return expand(ret_poly + polynomial)
+        constant = True
+        for c, dg in coef:
+            if dg != 0 and c != 0:
+                constant = False        
+
+        if constant:
+            return ret_poly + polynomial.full_simplify()
 
         first, last = coef[0], coef[-1]
 
@@ -516,3 +520,78 @@ def Qd3(d):
 
     return ret
 
+def dg_base_chebyshev_U(poly, dg):
+    x = var('x')
+
+    if dg > poly.degree(x):
+        return 0, poly
+
+    if poly.degree(x) == 0:
+        if dg == 0:
+            return poly, 0
+        else:
+            return 0, poly
+
+    if dg == 0:
+        return poly.coefficient(x, 0), poly - poly.coefficient(x, 0)
+
+    ch_U = chebyshev_U(dg, x).simplify_full()
+    lc_U = ch_U.leading_coefficient(x)
+    lc_p = poly.full_simplify().leading_coefficient(x)
+    
+    return (lc_p/lc_U).simplify_full(), (poly - lc_p/lc_U*ch_U).simplify_full()
+
+def base_U(poly):
+    x = var('x')
+    dg = poly.degree(x)
+    ret = [0]*(dg+1)
+    res = poly
+
+    for n in range(dg, -1, -1):
+        ret[n], res = dg_base_chebyshev_U(res, n)
+
+    return ret
+
+def try_full_simplify(f):
+    try:
+        return f.full_simplify().factor()
+    except:
+        return f
+
+def explicit_weight_elm(l, t, m, n):
+    k = 2*l + 2*t - n - m
+    s = (2*l - n + m - k)/2
+    coef = q**(-k + 2*s*(2*l - s - k)) 
+    line1 = (1 - q**(4*l + 2)) / (1 - q**(2*n + 2))
+    line2 = qpoch(q**2, q**2, 2*l - m) \
+        * qpoch(q**2, q**2, m) \
+        / qpoch(q**2, q**2, 2*l)
+    line3 = qpoch(q**(4*l - 2*n), q**(-2), m - t) \
+        / qpoch(q**(2*n + 4), q**2, m - t)
+    line4 = qpoch(q**(4*l + 4 - 2*t), q**2, t) \
+        / qpoch(q**2, q**2, t)
+
+
+    return coef*line1*line2*line3*line4
+
+def matrix_base_U(mat, n):
+    def get_base_U_n(elm, n):
+        try:
+            return base_U(elm)[n]
+        except:
+            return 0
+
+    return mat.apply_map(lambda elm : get_base_U_n(elm, n))
+
+def explicit_weight(l):
+    x = var('x')
+    W = matrix(SR, 2*l + 1, 2*l + 1)
+
+    for n in range(2*l + 1):
+        for m in range(n+1):
+            for t in range(m+1):
+                W[n, m] += explicit_weight_elm(l, t, m, n) \
+                    * chebyshev_U(n + m - 2*t, x)
+                W[m, n] = W[n, m]
+
+    return W
