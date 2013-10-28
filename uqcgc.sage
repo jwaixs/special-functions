@@ -1,6 +1,9 @@
-from basichypergeometric import qpoch, bhs
+load('basichypergeometric.sage')
 from qpolynomials import dual_q_Hahn_polynomials
+from qfunctions import qbinomial
 import sys
+
+q = var('q')
 
 def cgc(l1, l2, l, i, j, k):
     if i - j != k or i < -l1 or i > l1 or j < -l2 or j > l2 or k < -l or k > l:
@@ -34,10 +37,14 @@ def cgc(l1, l2, l, i, j, k):
             q**2, l1 + l2 - l)
         line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
 
+        #print line1
+
         line2 = sqrt((1 - q**(-4*l-2)) \
             / (1 - q**(-4*l1 - 4*l2 - 2))) \
             * q**(-2*l1*(2*l2+p) + (l1+l2-l)*(2*l1+2*l2+p) \
             - binomial(l1 + l2 - l, 2))
+
+        #print line2
 
         qpoch5 = qpoch(
             [q**(-4*l2-2*p), q**(-4*l1)],
@@ -51,11 +58,12 @@ def cgc(l1, l2, l, i, j, k):
             n, l1+l2-l, q**(-4*l1-2), q**(-4*l2-2), 2*l2+p, q**2
         )
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
-   
+        #print line3 
  
-    elif 0 <= p and p <= 2*l1 - 2*l2:
+    elif 0 <= p and p <= 2*l1:
         # Case 2
         #print 'case 2'
+
         qpoch1 = qpoch(q**(-4*l2 - 2*p), q**2, 2*l2)
         qpoch2 = qpoch(
             [q**(-4*l1 + 2*p), q**(-4*l1 - 4*l2 - 2), q**(-4*l2)], 
@@ -67,7 +75,6 @@ def cgc(l1, l2, l, i, j, k):
             q**2,
             l1 + l2 - l)
         line1 = sqrt((-1)**(l1 + l2 - l) * qpoch1 * qpoch2 / (qpoch3 * qpoch4))
-
 
         line2 = sqrt((1 - q**(-4*l - 2)) / (1 - q**(-4*l1 - 4*l2 - 2))) \
             * q**((l1+l2-l)*(2*l1+2*l2-p)+l2*(2*p-4*l1) \
@@ -109,10 +116,200 @@ def cgc(l1, l2, l, i, j, k):
     else:
         return 0
 
+
     return line1 * line2 * line3
+
+def bottom_cgc(l1, l2, l, i, j, m):
+    k = 2*l1
+    p = l1 - l2 - m
+    q = var('q') 
+
+    #print
+    if -2*l2 <= p and p < 0:
+        #print '1'
+        line1 = qpoch(q**(2*k - 4*l), q**2, l - m)
+        line2 = qpoch([q**(2*m - 2*l), q**(-2*k)], q**2, k/2 - i)
+        line3 = qpoch(q**(-4*l), q**2, l - m)
+        line4 = qpoch([q**2, q**(-2*k + 2*l + 2*m + 2)], q**2, k/2 - i) 
+        #qpower = q**(-(2*i - k)*(k - 2*l)*(2*l + 1)*(l + m))
+        qpower = q**(-(2*i - k)*(2*l + 1) - 2*k*(l - m))
+
+        #print line1
+        #print line2
+        #print line3
+        #print line4
+        #print qpower
+
+        return qpower * line1 * line2 / (line3 * line4)
+
+    elif 0 <= p and p <= 2*l1 - 2*l2:
+        #print '2'
+        #line1 = qpoch(q**(2*m - 2*l), q**2, 2*l - k)
+        line1 = qpoch(q**(-2*k), q**2, l + m)
+        line2 = qpoch([q**(2*k - 4*l), q**(-2*l - 2*m)], q**2, m + l - k/2 - i)
+        #line3 = qpoch(q**(-4*l), q**2, 2*l - k)
+        line3 = qpoch(q**(-4*l), q**2, l + m)
+        line4 = qpoch([q**2, q**(2*k - 2*l - 2*m + 2)], q**2, m + l - k/2 - i)
+        qpower = q**(-(2*i + k - 2*l - 2*m)*(2*l + 1) + 2*(k - 2*l)*(l + m))
+        #qpower = q**(2*(k - 2*l)*(k - 2*l) + (2*l + 1)*(2*l + 2*m - k - 2*i))
+
+        return qpower * line1 * line2 / (line3 * line4)
+
+    elif 2*l1 - 2*l2 < p and p <= 2*l1:
+        #print '3'
+        line1 = qpoch(q**(-2*k), q**2, l + m)
+        line2 = qpoch([q**(2*k - 4*l), q**(-2*l - 2*m)], q**2, m + l - k/2 - i)
+        line3 = qpoch(q**(-4*l), q**2, l + m)
+        line4 = qpoch([q**2, q**(2*k - 2*l - 2*m + 2)], q**2, m + l - k/2 - i)
+
+        #qpower = q**(2*(l + m)*(k - 2*l) + (1 + 2*l)*(2*l + 2*m - k - 2*i))
+        qpower = q**(-(2*i + k - 2*l - 2*m)*(2*l + 1) + 2*(k - 2*l)*(l + m))
+
+        return qpower * line1 * line2 / (line3 * line4)
+
+    else:
+        return 0
+
+def bottom_cgc2(l1, l2, l, i, j, m):
+    k = 2*l1 - l
+    p = l1 - l2 - m
+    q = var('q') 
+
+    #print
+    if -2*l2 <= p and p < 0:
+        #print '1'
+        line1 = qpoch(q**(2*k - 2*l), q**2, l - m)
+        line2 = qpoch([q**(2*m - 2*l), q**(-2*k - 2*l)], q**2, k/2 + l/2 - i)
+        line3 = qpoch(q**(-4*l), q**2, l - m)
+        line4 = qpoch([q**2, q**(-2*k + 2*m + 2)], q**2, k/2 + l/2 - i) 
+        qpower = q**(-(2*i - k - l)*(2*l + 1) - (2*k + 2*l)*(l - m))
+
+        #print line1
+        #print line2
+        #print line3
+        #print line4
+        #print qpower
+
+        return qpower * line1 * line2 / (line3 * line4)
+
+    elif 0 <= p and p <= 2*l1:
+        #print '2'
+        line1 = qpoch(q**(-2*k - 2*l), q**2, l + m)
+        line2 = qpoch([q**(2*k - 2*l), q**(-2*l - 2*m)], q**2, m + l/2 - k/2 - i)
+        line3 = qpoch(q**(-4*l), q**2, l + m)
+        line4 = qpoch([q**2, q**(2*k - 2*m + 2)], q**2, m + l/2 - k/2 - i)
+        qpower = q**(-(2*i + k - l - 2*m)*(2*l + 1) + (2*k - 2*l)*(l + m))
+
+        return qpower * line1 * line2 / (line3 * line4)
+
+    else:
+        return 0
+
+def bottom_cgc3(l1, l2, l, i, j, m):
+    k = 2*l1 - l
+    qpower = q**(2*(j - l2)*(i - l1))
+    
+    #qbin1 = qbinomial(l - m, l2 + j, q**2)
+    #qbin2 = qbinomial(l + m, l1 + i, q**2)
+    #qbin3 = qbinomial(2*l, l - k, q**2)
+   
+    qbin1 = qbinomial(l - k, l2 + j, q**2)
+    qbin2 = qbinomial(l + k, l1 + i, q**2)
+    qbin3 = qbinomial(2*l, l - m, q**2)
+
+    return qpower * qbin1 * qbin2 / qbin3
+
+def bottom_cgc_guess(l1, l2, l, i, j, k):
+    m = 2*l1 - l
+
+    qbin1 = qbinomial(l + m, i + l1, q**2)
+    qbin2 = qbinomial(l - m, j + l2, q**2)
+    qbin3 = qbinomial(2*l, l - k, q**2)
+
+    return qbin1 * qbin2 / qbin3
+
+def test_cgc_bottom(l):
+    q = var('q')
+    assume(q > 0)
+
+    for k in srange(2*l+1):
+        l1, l2 = k/2, l - k/2
+        for i in srange(-l1, l1+1):
+            for j in srange(-l2, l2+1):
+                m = i - j
+                c1 = try_full_simplify(cgc(l1, l2, l, i, j, m)**2) 
+                c2 = try_full_simplify(bottom_cgc(l1, l2, l, i, j, m))
+                if bool(c1 != c2):
+                    print l1, l2, l, i, j, m 
+                    print c1
+                    print c2
+                    return False
+                sys.stdout.write('.')
+                sys.stdout.flush()
+    return True
+
+def test_cgc_bottom2(l):
+    q = var('q')
+    assume(q > 0)
+
+    for k in srange(2*l+1):
+        l1, l2 = k/2, l - k/2
+        for i in srange(-l1, l1+1):
+            for j in srange(-l2, l2+1):
+                m = i - j
+                c1 = try_full_simplify(cgc(l1, l2, l, i, j, m)**2) 
+                c2 = try_full_simplify(bottom_cgc2(l1, l2, l, i, j, m))
+                if bool(c1 != c2):
+                    print l1, l2, l, i, j, m 
+                    print c1
+                    print c2
+                    return False
+                sys.stdout.write('.')
+                sys.stdout.flush()
+    return True
+
+def test_cgc_bottom3(l):
+    q = var('q')
+    n = var('n')
+    assume(q > 0)
+
+    for k in srange(2*l+1):
+        l1, l2 = k/2, l - k/2
+        for i in srange(-l1, l1+1):
+            for j in srange(-l2, l2+1):
+                m = i - j
+                c1 = try_full_simplify(cgc(l1, l2, l, i, j, m)**2)
+                c2 = try_full_simplify(bottom_cgc_guess(l1, l2, l, i, j, m))
+                #ret = solve([try_full_simplify(c1 / c2) == q**n], n, solution_dict=True)[0][n]
+                #print '    poly.substitute({l1 : %s, l2 : %s, l : %s, i : %s, j : %s, k : %s}) == %s,' % (l1, l2, l, i, j, k, ret)
+                print try_full_simplify(c1 / c2),
+                sys.stdout.flush()
+
+def test_cgc_bottom4(l):
+    q = var('q')
+    assume(q > 0)
+
+    for k in srange(2*l+1):
+        l1, l2 = k/2, l - k/2
+        for i in srange(-l1, l1+1):
+            for j in srange(-l2, l2+1):
+                m = i - j
+                c1 = try_full_simplify(cgc(l1, l2, l, i, j, m)**2) 
+                c2 = try_full_simplify(bottom_cgc3(l1, l2, l, i, j, m))
+                if bool(c1 != c2):
+                    print l1, l2, l, i, j, m 
+                    print c1
+                    print c2
+                    return False
+                sys.stdout.write('.')
+                sys.stdout.flush()
+    return True
+
 
 def test_cgc(l1, l2):
     from itertools import product
+
+    saved_cgc = {}
 
     # test 1
     for n1, m1 in product(srange(-l1, l1+1), repeat=2):
@@ -120,12 +317,37 @@ def test_cgc(l1, l2):
             s = 0
             for l in srange(abs(l1-l2), l1+l2+1):
                 for n in srange(-l, l+1):
-                    s += cgc(l1, l2, l, n1, n2, n) \
-                        * cgc(l1, l2, l, m1, m2, n)
+
+                    if (l1, l2, l, n1, n2, n) in saved_cgc.keys():
+                        cgc1 = saved_cgc[(l1, l2, l, n1, n2, n)]
+                    else:
+                        cgc1 = cgc(l1, l2, l, n1, n2, n)
+                        saved_cgc[(l1, l2, l, n1, n2, n)] = cgc1
+
+                    if (l1, l2, l, m1, m2, n) in saved_cgc.keys():
+                        cgc2 = saved_cgc[(l1, l2, l, m1, m2, n)]
+                    else:
+                        cgc2 = cgc(l1, l2, l, m1, m2, n)
+                        saved_cgc[(l1, l2, l, m1, m2, n)] = cgc2                        
+                    s += cgc1 * cgc2
+
             if bool(s != kronecker_delta(n1, m1)*kronecker_delta(n2, m2)):
                 for l in srange(abs(l1-l2), l1+l2+1):
                     for n in srange(-l, l+1):
-                        ret = cgc(l1, l2, l, n1, n2, n) * cgc(l1, l2, l, m1, m2, n)
+
+                        if (l1, l2, l, n1, n2, n) in saved_cgc.keys():
+                            cgc1 = saved_cgc[(l1, l2, l, n1, n2, n)]
+                        else:
+                            cgc1 = cgc(l1, l2, l, n1, n2, n)
+                            saved_cgc[(l1, l2, l, n1, n2, n)] = cgc1
+
+                        if (l1, l2, l, m1, m2, n) in saved_cgc.keys():
+                            cgc2 = saved_cgc[(l1, l2, l, m1, m2, n)]
+                        else:
+                            cgc2 = cgc(l1, l2, l, m1, m2, n)
+                            saved_cgc[(l1, l2, l, m1, m2, n)] = cgc2                        
+
+                        ret = cgc1 * cgc2
                         if ret != 0:
                             print l1, l2, l, n1, n2, n
                             print l1, l2, l, m1, m2, n
@@ -139,7 +361,18 @@ def test_cgc(l1, l2):
         for n, m in product(srange(-l, l+1), srange(-ll, ll+1)):
             s = 0
             for n1, n2 in product(srange(-l1, l1+1), srange(-l2, l2+1)):
-                s += cgc(l1, l2, l, n1, n2, n)*cgc(l1, l2, ll, n1, n2, m)
+                if (l1, l2, l, n1, n2, n) in saved_cgc.keys():
+                    cgc1 = saved_cgc[(l1, l2, l, n1, n2, n)]
+                else:
+                    cgc1 = cgc(l1, l2, l, n1, n2, n)
+                    saved_cgc[(l1, l2, l, n1, n2, n)] = cgc1
+
+                if (l1, l2, ll, m1, m2, n) in saved_cgc.keys():
+                    cgc2 = saved_cgc[(l1, l2, ll, n1, n2, m)]
+                else:
+                    cgc2 = cgc(l1, l2, ll, n1, n2, m)
+                    saved_cgc[(l1, l2, ll, n1, n2, m)] = cgc2                        
+                s += cgc1 * cgc2
             if bool(s != kronecker_delta(l, ll)*kronecker_delta(n, m)):
                 return False, 2, l, ll, n, m, s
             sys.stdout.write('.')
@@ -595,3 +828,24 @@ def explicit_weight(l):
                 W[m, n] = W[n, m]
 
     return W
+
+
+def f1(l, i, j, k):
+    line1 = qpoch(q**2, q**2, k) * qpoch(q**2, q**2, 2*l - k) \
+        * qpoch(q**2, q**2, l - j) * qpoch(q**2, q**2, l + j)
+    line2 = qpoch(q**2, q**2, i + k/2) * qpoch(q**2, q**2, k/2 - i) \
+        * qpoch(q**2, q**2, j + l - k/2) * qpoch(q**2, q**2, l - k/2 - j) \
+        * qpoch(q**2, q**2, 2*l)
+
+    return line1 / line2
+
+def f2(l, i, j, k):
+    l1 = k/2
+    l2 = l - k/2
+    m = i - j
+    p = k - l - m
+    
+    line1 = qpoch(q**(2*k - 4*l), q**2, l - m) * qpoch([q**(2*m - 2*l), q**(-2*k)], q**2, k/2 - i)
+    line2 = qpoch(q**(-4*l), q**2, l - m) * qpoch([q**2, q**(-2*k + 2*l + 2*m + 2)], q**2, k/2 - i)
+
+    return line1 / line2

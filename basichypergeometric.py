@@ -175,6 +175,8 @@ class qPochhammerSymbol():
 def qpoch(la, q, n):
     if n == 0:
         return 1
+    elif n < 0:
+        return 1 / qpoch(map(lambda elm : elm*q**n, la), q, -n)
     return qPochhammerSymbol(la, q, n).evaluate()
 
 class BasicHypergeometricSeries():
