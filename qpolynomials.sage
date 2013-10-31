@@ -1,5 +1,11 @@
-from basichypergeometric import BasicHypergeometricSeries, qPochhammerSymbol
+from basichypergeometric import *
 
+def askey_wilson(n, z, a, b, c, d, q):
+    lc = qpoch([a*b, a*c, a*d], q, n) / a**n
+    poly = bhs(
+        [q**(-n), a*b*c*d*q**(n-1), a*z, a*z**(-1)],
+        [a*b, a*c, a*d], q, q) 
+    return lc*poly
 
 class Askey_Wilson_polynomials():
     def __init__(self, n, x, a, b, c, d, q):
