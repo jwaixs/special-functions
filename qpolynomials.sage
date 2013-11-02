@@ -1,4 +1,5 @@
-from basichypergeometric import *
+#from basichypergeometric import *
+load('basichypergeometric.sage')
 
 def askey_wilson(n, z, a, b, c, d, q):
     lc = qpoch([a*b, a*c, a*d], q, n) / a**n
