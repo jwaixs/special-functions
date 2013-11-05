@@ -849,3 +849,242 @@ def f2(l, i, j, k):
     line2 = qpoch(q**(-4*l), q**2, l - m) * qpoch([q**2, q**(-2*k + 2*l + 2*m + 2)], q**2, k/2 - i)
 
     return line1 / line2
+
+def test1(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for j1 in srange(-l1, l1+1):
+        for i1 in srange(-m1, m1+1):
+            for j in srange(-l, l+1):
+                ret += q**(2*i1 - 2*j1) \
+                    * cgc(l1, l2, l, j1, j1 - j, j)**2 \
+                    * cgc(m1, m2, l, i1, i1 - j, j)**2 * z**(2*j1 - 2*i1)
+
+    return ret
+
+def test2(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for j1 in srange(-l1, l1+1):
+        for i1 in srange(-m1, m1+1):
+            for j in srange(-l, l+1):
+                ret += q**(2*(i1 + j1) + 2*(j1 + l1)*(j1 + j + l2) \
+                        - 2*(j1 - l1)*(j1 + j - l2) ) \
+                    * cgc(l1, l2, l, j1, j1 + j, -j)**2 \
+                    * cgc(m1, m2, l, i1, i1 - j, j)**2 * z**(2*(-j1 - i1))
+
+    return ret
+
+
+def test3(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for j1 in srange(-l1, l1+1):
+        for i1 in srange(-m1, m1+1):
+            for j in srange(-l, l+1):
+                if cgc(l1, l2, l, j1, j1 + j, -j) == 0 or cgc(m1, m2, l, i1, i1 - j, j) == 0:
+                    continue
+                ret += q**(2*(i1 + j1) + 2*(j1 + l1)*(j1 + j + l2) \
+                        - 2*(j1 - l1)*(j1 + j - l2) ) \
+                    * q**(2*(j1 - l1)*(j1 + j - l2)) \
+                    * qbinomial(2*l1, l1 + j1, q**2) \
+                    * qbinomial(2*l2, l2 + j1 + j, q**2) \
+                    / qbinomial(2*l, l + j, q**2) \
+                    * q**(2*(i1 - m1)*(i1 - j - m2)) \
+                    * qbinomial(2*m1, m1 + i1, q**2) \
+                    * qbinomial(2*m2, m2 + i1 - j, q**2) \
+                    / qbinomial(2*l, l - j, q**2) * z**(2*(-j1 - i1))
+
+    return ret
+
+def test4(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for j in srange(-l1, l1+1):
+        for i in srange(-m1, m1+1):
+            ret2 = 0
+            for k in srange(max(-j - l2, i - m2), min(-j + l2, i + m2) + 1):
+                ret2 += q**(2*(j + l1)*k - 2*(i - m1)*k) \
+                    * qbinomial(2*l2, l2 - j - k, q**2) \
+                    * qbinomial(2*m2, m2 - i + k, q**2) \
+                    / qbinomial(2*l, l - k, q**2)**2
+            ret1 += q**(2*(i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
+                * qbinomial(2*l1, l1 + j, q**2) \
+                * qbinomial(2*m1, m1 + i, q**2) \
+                * ret2 * z**(-2*(i + j))
+
+    return ret1
+
+def funcF(l, i, j, p, qq):
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for k in srange(max(-j - l2, i - m2), min(-j + l2, i + m2) + 1):
+        ret += q**(2*(j + l1)*k - 2*(i - m1)*k) \
+            * qbinomial(2*l2, l2 - j - k, q**2) \
+            * qbinomial(2*m2, m2 - i + k, q**2) \
+            / qbinomial(2*l, l - k, q**2)**2
+    ret *= q**(2*(i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
+        * qbinomial(2*l1, l1 + j, q**2) \
+        * qbinomial(2*m1, m1 + i, q**2) 
+
+    return ret
+
+def test5(l, p, qq):
+    z = var('z')
+
+     
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for r in srange(-(l + (p + qq)/2), l + (p + qq)/2 + 1):
+        ret2 = 0
+        for i in srange(max(-m1, r - l1), min(m1, r + l1) + 1):
+            ret2 += funcF(l, i, r - i, p, qq)
+        ret1 += ret2*z**(-2*r)
+
+    return ret1
+
+def funcd1(l, r, p, qq):
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for i in srange(max(-m1, r - l1), min(m1, r + l1) + 1):
+        ret += funcF(l, i, r - i, p, qq)
+    
+    return ret
+
+def test6(l, p, qq):
+    z = var('z')
+
+     
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for r in srange(-(l + (p + qq)/2), l + (p + qq)/2 + 1):
+        ret += funcd1(l, r, p, qq)*z**(-2*r)
+
+    return ret
+
+def funcd2(l, s, p, qq):
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for i in srange(max(-m1, s + (p - qq)/2 - l1), min(m1, s + (p - qq)/2 + l1) + 1):
+        ret1 += funcF(l, i, s + (p - qq)/2 - i, p, qq)
+
+    #for n in range(l + qq - s + 1):
+    #    ret2 = 0
+    #    for k in srange(n + s - l, n - p + 1):
+    #        ret2 += q**(2*k*(l + p - n) - 2*k*(n + s - l - qq)) \
+    #            * qbinomial(l - p, l - n + k, q**2) \
+    #            * qbinomial(l - q, n + s - k - qq, q**2) \
+    #            / qbinomial(2*l, l - k, q**2)**2 
+    #    ret1 += q**(2*(s + (p - q)/2) + 2*(l + p - n)*(l - n) + 2*(n + s)*(n + s - l)) \
+    #        * qbinomial(l + p, l + p - n, q**2) \
+    #        * qbinomial(l + q, n + s, q**2) * ret2
+
+    return ret1
+
+def test7(l, p, qq):
+    z = var('z')
+
+     
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+    
+    ret = 0
+    for s in srange(-l - qq, l + qq + 1):
+        ret += funcd1(l, s + (p - qq)/2, p, qq)*z**(-2*(s + (p - qq)/2))
+        #ret += funcd2(l, s, p, qq)*z**(-2*(s + (p - qq)/2))
+
+    return ret
+
+def funcd3(l, s, p, qq):
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        #ret1 += funcF(l, n + s - (l + qq)/2, (l + p)/2 - n, p, qq)
+        ret2 = 0
+        i, j = n + s - (l + qq)/2, (l + p)/2 - n
+        for k in srange(n + s - l, n - p + 1):
+            ret2 += q**(2*(l + p - n)*k - 2*(n + s - l - qq)*k) \
+                * qbinomial(2*l2, n - k - p, q**2) \
+                * qbinomial(2*m2, l - n - s + k, q**2) \
+                / qbinomial(2*l, l - k, q**2)**2
+        ret2 *= q**(2*(s + (p - qq)/2) + 2*(l + p - n)*(l - n) + 2*(n + s - l - qq)*(n + s - l)) \
+            * qbinomial(2*l1, l + p - n, q**2) \
+            * qbinomial(2*m1, n + s, q**2) 
+        ret1 += ret2
+
+    return ret1
+
+def funcd4(l, s, p, qq):
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        i, j = n + s - (l + qq)/2, (l + p)/2 - n
+        for m in srange(0, l - s - p + 1):
+            k = m + n + s - l
+            ret2 += q**(2*m*(2*l - 2*n + p + qq - s)) \
+                * qbinomial(l - p, m + s, q**2) \
+                * qbinomial(l - qq, m, q**2) \
+                / qbinomial(2*l, m + n + s, q**2)**2
+        ret2 *= q**(2*s*(l + p - n)) \
+            * qbinomial(2*l1, n, q**2) \
+            * qbinomial(2*m1, n + s, q**2) 
+        ret1 += ret2
+
+    return q**(2*(s + (p - qq)/2))*ret1

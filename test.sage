@@ -1,4 +1,5 @@
 from sage.symbolic.expression import Expression
+from sage.symbolic.function import SymbolicFunction
 
 class new_exp(Expression):
     def __init__(self, SR, x=0, y=0):
@@ -14,7 +15,9 @@ class qPochhammerSymbol(Expression):
         self.list_a = list_a if type(list_a) == list else [list_a]
         self.q = q
         self.n = n
-        Expression.__init__(self, SR, self.evaluate())
+
+        if self.n in ZZ:
+            Expression.__init__(self, SR, self.evaluate())
 
     def _latex_(self):
         return "(%s;%s)_{%s}" % (','.join(map(str, self.list_a)), str(self.q), \
@@ -129,7 +132,8 @@ class Askey_Wilson(Expression):
         self.d = d
         self.param = [a, b, c, d]
 
-        Expression.__init__(self, SR, self.evaluate())
+        if self.n in ZZ:
+            Expression.__init__(self, SR, self.evaluate())
 
     def __repr__(self):
         return 'p_%i(%s;%s,%s,%s,%s|%s)' % (
