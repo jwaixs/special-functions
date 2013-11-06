@@ -1088,3 +1088,300 @@ def funcd4(l, s, p, qq):
         ret1 += ret2
 
     return q**(2*(s + (p - qq)/2))*ret1
+
+def funcd5(l, s, p, qq):
+    # Good test case: 7/2, 1, -1/2, -1/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        i, j = n + s - (l + qq)/2, (l + p)/2 - n
+        for m in srange(0, l - s - p + 1):
+            ret2 += q**(2*m*(2*l - 2*n + p + qq - s)) \
+                * q**((2*l - 2*p)*(m + s) - 2*binomial(m + s, 2)) \
+                * qpoch(q**(2*p - 2*l), q**2, m + s) \
+                / qpoch(q**2, q**2, m + s) \
+                * q**((2*l - 2*qq)*m - 2*binomial(m, 2)) \
+                * qpoch(q**(2*qq - 2*l), q**2, m) \
+                / qpoch(q**2, q**2, m) \
+                * q**(-2*(4*l)*(m + n + s) + 4*binomial(m + n + s, 2)) \
+                * qpoch(q**2, q**2, m + n + s)**2 \
+                / qpoch(q**(-4*l), q**2, m + n + s)**2
+        ret2 *= q**(2*s*(l + p - n)) \
+            * qbinomial(2*l1, n, q**2) \
+            * qbinomial(2*m1, n + s, q**2) 
+        ret1 += ret2
+
+    return (-1)**s * q**(2*(s + (p - qq)/2))*ret1
+
+def funcd6(l, s, p, qq):
+    # Good test case: 7/2, 1, -1/2, -1/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        i, j = n + s - (l + qq)/2, (l + p)/2 - n
+        #for m in srange(0, l - s - p + 1):
+        #    ret2 += qpoch(q**(2*p - 2*l + 2*s), q**2, m) \
+        #        / qpoch(q**(2 + 2*s), q**2, m) \
+        #        * qpoch(q**(2*qq - 2*l), q**2, m) \
+        #        / qpoch(q**2, q**2, m) \
+        #        * qpoch(q**(2 + 2*n + 2*s), q**2, m)**2 \
+        #        / qpoch(q**(-4*l + 2*n + 2*s), q**2, m)**2
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*n + 2*s + 2),
+                q**(2*n + 2*s + 2)
+            ], [
+                q**(2*s + 2),
+                q**(2*s + 2*n - 4*l),
+                q**(2*s + 2*n - 4*l)
+            ], q**2, 1)
+        ret2 *= q**(2*s*(l + p - n)) * q**(-2*(4*l + 1)*n + 2*n**2 - (6*l - 4*n + 2*p + 1)*s + s**2) \
+            * qpoch(q**(2*p - 2*l), q**2, s) \
+            / qpoch(q**2, q**2, s) \
+            * qpoch(q**2, q**2, n + s)**2 \
+            / qpoch(q**(-4*l), q**2, n + s)**2 \
+            * qbinomial(2*l1, n, q**2) \
+            * qbinomial(2*m1, n + s, q**2) 
+        ret1 += ret2
+
+    return (-1)**s * q**(2*(s + (p - qq)/2))*ret1
+
+def funcd7(l, s, p, qq):
+    # Good test case: 7/2, 1, -1/2, -1/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        i, j = n + s - (l + qq)/2, (l + p)/2 - n
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*n + 2*s + 2),
+                q**(2*n + 2*s + 2)
+            ], [
+                q**(2*s + 2),
+                q**(2*s + 2*n - 4*l),
+                q**(2*s + 2*n - 4*l)
+            ], q**2, 1)
+        ret2 *= q**(2*n**2 + 2*n*(-4*l + s - 1))  \
+            * qpoch(q**(2*p - 2*l), q**2, s) \
+            / qpoch(q**2, q**2, s) \
+            * qpoch(q**2, q**2, n + s)**2 \
+            / qpoch(q**(-4*l), q**2, n + s)**2 \
+            * qbinomial(2*l1, n, q**2) \
+            * qbinomial(2*m1, n + s, q**2) 
+        ret1 += ret2
+
+    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+
+def funcd8(l, s, p, qq):
+    # Good test case: 7/2, 1, -1/2, -1/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*l + 2*qq - 2*n + 2),
+                q**(2*l + 2*qq - 2*n + 2)
+            ], [
+                q**(2*s + 2),
+                q**(-2*l - 2*n + 2*qq),
+                q**(-2*l - 2*n + 2*qq)
+            ], q**2, 1)
+        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s))
+        ret2 *= qpoch(q**(2*p - 2*l), q**2, s) \
+            / qpoch(q**2, q**2, s) \
+            * qpoch(q**2, q**2, -n + l + qq)**2 \
+            / qpoch(q**(-4*l), q**2, -n + l + qq)**2 \
+            * qbinomial(2*l1, -n + l + qq - s, q**2) \
+            * qbinomial(2*m1, - n + l + qq, q**2) 
+        ret1 += ret2
+
+    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+
+def test_funcd(f1, f2):
+    for i in range(3):
+        print 4, i, bool(f1(4, i, -1, -2) == f2(4, i, -1, -2))
+    for i in range(3):
+        print 7/2, i, bool(f1(7/2, i, -1/2, -3/2) == f2(7/2, i, -1/2, -3/2))
+    for i in range(2):
+        print 3, i, bool(f1(3, i, -1, -2) == f2(3, i, -1, -2))
+
+def funcd9(l, s, p, qq):
+    # Good test case: 7/2, 2, -1/2, -3/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*l + 2*qq - 2*n + 2),
+                q**(2*l + 2*qq - 2*n + 2)
+            ], [
+                q**(2*s + 2),
+                q**(-2*l - 2*n + 2*qq),
+                q**(-2*l - 2*n + 2*qq)
+            ], q**2, 1)
+        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
+        #ret2 *= qpoch(q**(2*p - 2*l), q**2, s) \
+        #    / qpoch(q**2, q**2, s) \
+        #    * qpoch(q**2, q**2, l + qq)**2 * qpoch(q**(2 + 2*l + 2*qq), q**2, -n)**2 \
+        #    / qpoch(q**(-4*l), q**2, l + qq)**2 / qpoch(q**(-2*l + 2*qq), q**2, -n)**2 \
+        #    * qpoch(q**(2*p + 2*n - 2*qq + 2*s + 2), q**2, l + qq - s) * qpoch(q**(2*p + 2*n + 2 + 2*l), q**2, -n)\
+        #    / qpoch(q**2, q**2, l + qq - s) / qpoch(q**(2 + 2*l + 2*qq - 2*s), q**2, -n) \
+        #    * qpoch(q**2, q**2, l + qq) * qpoch(q**(2*n + 2), q**2, -n) \
+        #    / qpoch(q**2, q**2, l + qq) / qpoch(q**(2 + 2*l + 2*qq), q**2, -n)
+        ret2 *= qpoch(q**(2*p - 2*l), q**2, s) \
+            / qpoch(q**2, q**2, s) \
+            * qpoch(q**2, q**2, l + qq)**2 * qpoch(q**(2 + 2*l + 2*qq), q**2, -n)**2 \
+            / qpoch(q**(-4*l), q**2, l + qq)**2 / qpoch(q**(-2*l + 2*qq), q**2, -n)**2 \
+            * qpoch(q**(-2*l - 2*p), q**2, -n + l + qq - s) \
+            / qpoch(q**2, q**2, l + qq - s) / qpoch(q**(2 + 2*l + 2*qq - 2*s), q**2, -n) \
+            * qpoch(q**2, q**2, l + qq) / qpoch(q**2, q**2, n) \
+            / qpoch(q**2, q**2, l + qq) / qpoch(q**(2 + 2*l + 2*qq), q**2, -n)
+        ret1 += ret2
+
+    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+
+def funcd10(l, s, p, qq):
+    # Good test case: 7/2, 2, -1/2, -3/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*l + 2*qq - 2*n + 2),
+                q**(2*l + 2*qq - 2*n + 2)
+            ], [
+                q**(2*s + 2),
+                q**(-2*l - 2*n + 2*qq),
+                q**(-2*l - 2*n + 2*qq)
+            ], q**2, 1)
+        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
+        ret2 *= q**(2*n*(-2*l - 2*qq) + 4*binomial(n, 2)) / qpoch(q**(-2*l - 2*qq), q**2, n)**2 \
+            / q**(2*n*(2 + 2*l - 2*qq) + 4*binomial(n, 2)) * qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
+            * (-1)**n * q**((2 + 2*p - 2*qq + 2*s)*n + 2*binomial(n, 2)) / qpoch(q**(2 + 2*p - 2*qq + 2*s), q**2, n) \
+            / q**(n*(-2*l - 2*qq + 2*s) + 2*binomial(n, 2)) * (-1)**n * qpoch(q**(-2*l - 2*qq + 2*s), q**2, n) \
+            / qpoch(q**2, q**2, n) \
+            / q**(-n*(2*l + 2*qq) + 2*binomial(n, 2)) * (-1)**n * qpoch(q**(-2*l - 2*qq), q**2, n) 
+        ret1 += ret2
+
+    ret1 *= qpoch(q**(2*p - 2*l), q**2, s) \
+        /  qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, l + qq)**2 \
+        / qpoch(q**(-4*l), q**2, l + qq)**2 \
+        * qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq - s) \
+        * qpoch(q**2, q**2, l + qq) \
+        / qpoch(q**2, q**2, l + qq)
+
+    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+
+def funcd11(l, s, p, qq):
+    # Good test case: 7/2, 2, -1/2, -3/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*l + 2*qq - 2*n + 2),
+                q**(2*l + 2*qq - 2*n + 2)
+            ], [
+                q**(2*s + 2),
+                q**(-2*l - 2*n + 2*qq),
+                q**(-2*l - 2*n + 2*qq)
+            ], q**2, 1)
+        ret2 *= 1 / qpoch(q**(-2*l - 2*qq), q**2, n)**2 \
+            * qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
+            / qpoch(q**(2 + 2*p - 2*qq + 2*s), q**2, n) \
+            * qpoch(q**(-2*l - 2*qq + 2*s), q**2, n) \
+            / qpoch(q**2, q**2, n) \
+            * qpoch(q**(-2*l - 2*qq), q**2, n) 
+        ret1 += ret2
+
+    ret1 *= qpoch(q**(2*p - 2*l), q**2, s) \
+        /  qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, l + qq)**2 \
+        / qpoch(q**(-4*l), q**2, l + qq)**2 \
+        * qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq - s) \
+        * qpoch(q**2, q**2, l + qq) \
+        / qpoch(q**2, q**2, l + qq)
+
+    ret1 *= (-1)**(l + qq) * q**(-4*l*s + s**2 + p - qq + s -5*l**2 + 2*l*p - 4*l*qq + 2*p*qq + qq**2 + 6*l*s - 2*p*s - s**2 - l - qq + s)
+    return ret1
+
+def funcd12(l, s, p, qq):
+    # Good test case: 7/2, 2, -1/2, -3/2
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret1 = 0
+    for n in srange(l + qq - s + 1):
+        ret2 = 0
+        ret2 += bhs([
+                q**(2*p - 2*l + 2*s),   
+                q**(2*qq - 2*l),
+                q**(2*l + 2*qq - 2*n + 2),
+                q**(2*l + 2*qq - 2*n + 2)
+            ], [
+                q**(2*s + 2),
+                q**(-2*l - 2*n + 2*qq),
+                q**(-2*l - 2*n + 2*qq)
+            ], q**2, 1)
+        ret2 *= qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
+            * qpoch(q**(-2*l - 2*qq + 2*s), q**2, n) \
+            / qpoch(q**(-2*l - 2*qq), q**2, n) \
+            / qpoch(q**(2 + 2*p - 2*qq + 2*s), q**2, n) \
+            / qpoch(q**2, q**2, n)
+        ret1 += ret2
+
+    ret1 *= qpoch(q**(2*p - 2*l), q**2, s) \
+        /  qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, l + qq)**2 \
+        / qpoch(q**(-4*l), q**2, l + qq)**2 \
+        * qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq - s) \
+
+    ret1 *= (-1)**(l + qq) * q**(-4*l*s + s**2 + p - qq + s -5*l**2 + 2*l*p - 4*l*qq + 2*p*qq + qq**2 + 6*l*s - 2*p*s - s**2 - l - qq + s)
+    return ret1
