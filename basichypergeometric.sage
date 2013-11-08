@@ -257,11 +257,11 @@ class BasicHypergeometricSeries():
         self.list_b = list_b
 
         # remove duplicates in list_a \cap list_b to avoid dividing by zero
-        temp_a = self.list_a[:]
-        for elm in temp_a:
-            if elm in self.list_b:
-                self.list_a.remove(elm)
-                self.list_b.remove(elm)
+        #temp_a = self.list_a[:]
+        #for elm in temp_a:
+        #    if elm in self.list_b:
+        #        self.list_a.remove(elm)
+        #        self.list_b.remove(elm)
 
         self.q = q
         self.z = z
@@ -313,6 +313,8 @@ class BasicHypergeometricSeries():
             j, k = len(self.list_a), len(self.list_b)
 
             nominator = qPochhammerSymbol(self.list_a, self.q, key).evaluate()
+            if nominator == 0:
+                return 0
             denominator = qPochhammerSymbol( \
                                     self.list_b, self.q, key).evaluate() \
                 * qPochhammerSymbol(self.q, self.q, key).evaluate()

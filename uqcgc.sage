@@ -816,17 +816,6 @@ def matrix_base_U(mat, n):
     return mat.apply_map(lambda elm : get_base_U_n(elm, n))
 
 def explicit_weight(l):
-    r'''
-    TESTS::
-        sage: weights = load('weights3.sobj')
-        sage: for i in range(5): print bool(SageSimplifyMatrix(weights[i]) == SageSimplifyMatrix(explicit_weight(i/2)))
-        True
-        True
-        True
-        True
-        True
-
-    '''
     x = var('x')
     W = matrix(SR, 2*l + 1, 2*l + 1)
 
@@ -838,6 +827,31 @@ def explicit_weight(l):
                 W[n, m] = W[m, n]
 
     return W
+
+def test_all():
+    print 'test functions:'
+    print 'test1'
+    if not test_tests(test0, test1):
+        return False
+    print 'test2'
+    if not test_tests(test1, test2):
+        return False
+    print 'test3'
+    if not test_tests(test2, test3):
+        return False
+    print 'test4'
+    if not test_tests(test3, test4):
+        return False
+    
+    print 'Test weight'
+    weights = load('weights3.sobj')
+    for i in range(5): 
+        print 'Test weight %s' % (i/2)
+        if not bool(SageSimplifyMatrix(weights[i]) == SageSimplifyMatrix(explicit_weight(i/2))):
+            print 'Weight %s failed!' % (i/2)
+
+
+    return True
 
 
 def f1(l, i, j, k):
@@ -873,11 +887,11 @@ def test0(l, p, qq):
         for j2 in srange(-l2, l2+1):
             for i1 in srange(-m1, m1+1):
                 for i2 in srange(-m2, m2+1):
-                    for j in srange(-l1, l+1):
+                    for j in srange(-l, l+1):
                         ret += q**(-j1 - j2 - i1 - i2) \
                             * cgc(l1, l2, l, j1, j2, j)**2 \
                             * cgc(m1, m2, l, i1, i2, j)**2 \
-                            * z**(i1 + i2 - j1 - j2)
+                            * z**(-i1 - i2 + j1 + j2)
     
     return ret
     
@@ -940,10 +954,17 @@ def test2(l, p, qq):
 def test_tests(t1, t2):
     for l in srange(1/2, 5/2):
         print l, -1/2, -1/2, bool(t1(l, -1/2, -1/2) == t2(l, -1/2, -1/2))
+        if not bool(t1(l, -1/2, -1/2) == t2(l, -1/2, -1/2)):
+            return False
     for l in srange(3/2, 7/2):
         print l, -1/2, -3/2, bool(t1(l, -1/2, -3/2) == t2(l, -1/2, -3/2))
+        if not bool(t1(l, -1/2, -3/2) == t2(l, -1/2, -3/2)):
+            return False
     for l in range(2, 4):
         print l, -1, -2, bool(t1(l, -1, -2) == t2(l, -1, -2))
+        if not bool(t1(l, -1, -2) == t2(l, -1, -2)):
+            return False
+    return True
 
 def test3(l, p, qq):
     z = var('z')
