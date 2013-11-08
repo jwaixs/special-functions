@@ -60,7 +60,7 @@ def cgc(l1, l2, l, i, j, k):
         line3 = q**((2*l1 + 2*l2 + 1)*n) * sqrt(qpoch5 / qpoch6) * poly
         #print line3 
  
-    elif 0 <= p and p <= 2*l1:
+    elif 0 <= p and p <= 2*l1 - 2*l2:
         # Case 2
         #print 'case 2'
 
@@ -804,7 +804,6 @@ def explicit_weight_elm(l, t, m, n):
     line4 = qpoch(q**(4*l + 4 - 2*t), q**2, t) \
         / qpoch(q**2, q**2, t)
 
-
     return coef*line1*line2*line3*line4
 
 def matrix_base_U(mat, n):
@@ -817,15 +816,26 @@ def matrix_base_U(mat, n):
     return mat.apply_map(lambda elm : get_base_U_n(elm, n))
 
 def explicit_weight(l):
+    r'''
+    TESTS::
+        sage: weights = load('weights3.sobj')
+        sage: for i in range(5): print bool(SageSimplifyMatrix(weights[i]) == SageSimplifyMatrix(explicit_weight(i/2)))
+        True
+        True
+        True
+        True
+        True
+
+    '''
     x = var('x')
     W = matrix(SR, 2*l + 1, 2*l + 1)
 
-    for n in range(2*l + 1):
-        for m in range(n+1):
-            for t in range(m+1):
-                W[n, m] += explicit_weight_elm(l, t, m, n) \
+    for m in range(2*l + 1):
+        for n in range(m+1):
+            for t in range(n+1):
+                W[m, n] += explicit_weight_elm(l, t, m, n) \
                     * chebyshev_U(n + m - 2*t, x)
-                W[m, n] = W[n, m]
+                W[n, m] = W[m, n]
 
     return W
 
@@ -850,6 +860,28 @@ def f2(l, i, j, k):
 
     return line1 / line2
 
+def test0(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for j1 in srange(-l1, l1+1):
+        for j2 in srange(-l2, l2+1):
+            for i1 in srange(-m1, m1+1):
+                for i2 in srange(-m2, m2+1):
+                    for j in srange(-l1, l+1):
+                        ret += q**(-j1 - j2 - i1 - i2) \
+                            * cgc(l1, l2, l, j1, j2, j)**2 \
+                            * cgc(m1, m2, l, i1, i2, j)**2 \
+                            * z**(i1 + i2 - j1 - j2)
+    
+    return ret
+    
+
 def test1(l, p, qq):
     z = var('z')
 
@@ -862,9 +894,27 @@ def test1(l, p, qq):
     for j1 in srange(-l1, l1+1):
         for i1 in srange(-m1, m1+1):
             for j in srange(-l, l+1):
-                ret += q**(2*i1 - 2*j1) \
+                ret += q**(-2*i1 - 2*j1 + 2*j) \
                     * cgc(l1, l2, l, j1, j1 - j, j)**2 \
                     * cgc(m1, m2, l, i1, i1 - j, j)**2 * z**(2*j1 - 2*i1)
+
+    return ret
+
+def test15(l, p, qq):
+    z = var('z')
+
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+
+    ret = 0
+    for j1 in srange(-l1, l1+1):
+        for i1 in srange(-m1, m1+1):
+            for j in srange(-l, l+1):
+                ret += q**(-2*i1 + 2*j1 + 2*j) \
+                    * cgc(l1, l2, l, -j1, -j1 - j, j)**2 \
+                    * cgc(m1, m2, l, i1, i1 - j, j)**2 * z**(-2*j1 - 2*i1)
 
     return ret
 
@@ -880,13 +930,20 @@ def test2(l, p, qq):
     for j1 in srange(-l1, l1+1):
         for i1 in srange(-m1, m1+1):
             for j in srange(-l, l+1):
-                ret += q**(2*(i1 + j1) + 2*(j1 + l1)*(j1 + j + l2) \
-                        - 2*(j1 - l1)*(j1 + j - l2) ) \
+                ret += q**(2*(-i1 + j1 + j) + 2*(j1 + l1)*(j1 + j + l2) \
+                        - 2*(j1 - l1)*(j1 + j - l2)) \
                     * cgc(l1, l2, l, j1, j1 + j, -j)**2 \
                     * cgc(m1, m2, l, i1, i1 - j, j)**2 * z**(2*(-j1 - i1))
 
     return ret
 
+def test_tests(t1, t2):
+    for l in srange(1/2, 5/2):
+        print l, -1/2, -1/2, bool(t1(l, -1/2, -1/2) == t2(l, -1/2, -1/2))
+    for l in srange(3/2, 7/2):
+        print l, -1/2, -3/2, bool(t1(l, -1/2, -3/2) == t2(l, -1/2, -3/2))
+    for l in range(2, 4):
+        print l, -1, -2, bool(t1(l, -1, -2) == t2(l, -1, -2))
 
 def test3(l, p, qq):
     z = var('z')
@@ -902,7 +959,7 @@ def test3(l, p, qq):
             for j in srange(-l, l+1):
                 if cgc(l1, l2, l, j1, j1 + j, -j) == 0 or cgc(m1, m2, l, i1, i1 - j, j) == 0:
                     continue
-                ret += q**(2*(i1 + j1) + 2*(j1 + l1)*(j1 + j + l2) \
+                ret += q**(2*(-i1 + j1 + j) + 2*(j1 + l1)*(j1 + j + l2) \
                         - 2*(j1 - l1)*(j1 + j - l2) ) \
                     * q**(2*(j1 - l1)*(j1 + j - l2)) \
                     * qbinomial(2*l1, l1 + j1, q**2) \
@@ -928,11 +985,11 @@ def test4(l, p, qq):
         for i in srange(-m1, m1+1):
             ret2 = 0
             for k in srange(max(-j - l2, i - m2), min(-j + l2, i + m2) + 1):
-                ret2 += q**(2*(j + l1)*k - 2*(i - m1)*k) \
+                ret2 += q**(2*k + 2*(j + l1)*k - 2*(i - m1)*k) \
                     * qbinomial(2*l2, l2 - j - k, q**2) \
                     * qbinomial(2*m2, m2 - i + k, q**2) \
                     / qbinomial(2*l, l - k, q**2)**2
-            ret1 += q**(2*(i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
+            ret1 += q**(2*(-i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
                 * qbinomial(2*l1, l1 + j, q**2) \
                 * qbinomial(2*m1, m1 + i, q**2) \
                 * ret2 * z**(-2*(i + j))
@@ -940,6 +997,7 @@ def test4(l, p, qq):
     return ret1
 
 def funcF(l, i, j, p, qq):
+    '''F from the definition'''
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -947,11 +1005,11 @@ def funcF(l, i, j, p, qq):
 
     ret = 0
     for k in srange(max(-j - l2, i - m2), min(-j + l2, i + m2) + 1):
-        ret += q**(2*(j + l1)*k - 2*(i - m1)*k) \
+        ret += q**(2*(1 + j + l1)*k - 2*(i - m1)*k) \
             * qbinomial(2*l2, l2 - j - k, q**2) \
             * qbinomial(2*m2, m2 - i + k, q**2) \
             / qbinomial(2*l, l - k, q**2)**2
-    ret *= q**(2*(i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
+    ret *= q**(2*(-i + j) + 2*(j + l1)*(j + l2) + 2*(i - m1)*(i - m2)) \
         * qbinomial(2*l1, l1 + j, q**2) \
         * qbinomial(2*m1, m1 + i, q**2) 
 
@@ -976,6 +1034,7 @@ def test5(l, p, qq):
     return ret1
 
 def funcd1(l, r, p, qq):
+    '''replace j -> r - i'''
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -1002,7 +1061,23 @@ def test6(l, p, qq):
 
     return ret
 
+def test7(l, p, qq):
+    z = var('z')
+
+     
+    l1 = (l + p)/2
+    l2 = (l - p)/2
+    m1 = (l + qq)/2
+    m2 = (l - qq)/2
+    
+    ret = 0
+    for s in srange(-l - p, l + p + 1):
+        ret += funcd1(l, s + (p - qq)/2, p, qq)*z**(-2*(s + (p - qq)/2))
+
+    return ret
+
 def funcd2(l, s, p, qq):
+    '''Substitution r(s) -> s + (p - q)/2'''
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -1025,7 +1100,7 @@ def funcd2(l, s, p, qq):
 
     return ret1
 
-def test7(l, p, qq):
+def test8(l, p, qq):
     z = var('z')
 
      
@@ -1035,13 +1110,14 @@ def test7(l, p, qq):
     m2 = (l - qq)/2
     
     ret = 0
-    for s in srange(-l - qq, l + qq + 1):
-        ret += funcd1(l, s + (p - qq)/2, p, qq)*z**(-2*(s + (p - qq)/2))
-        #ret += funcd2(l, s, p, qq)*z**(-2*(s + (p - qq)/2))
+    for s in srange(-l - p, l + p + 1):
+        ret += funcd2(l, s, p, qq)*z**(-2*(s + (p - qq)/2))
 
     return ret
 
+
 def funcd3(l, s, p, qq):
+    '''Writing out F in qbinomials.'''
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -1054,11 +1130,11 @@ def funcd3(l, s, p, qq):
         ret2 = 0
         i, j = n + s - (l + qq)/2, (l + p)/2 - n
         for k in srange(n + s - l, n - p + 1):
-            ret2 += q**(2*(l + p - n)*k - 2*(n + s - l - qq)*k) \
+            ret2 += q**(2*(1 + l + p - n)*k - 2*(n + s - l - qq)*k) \
                 * qbinomial(2*l2, n - k - p, q**2) \
                 * qbinomial(2*m2, l - n - s + k, q**2) \
                 / qbinomial(2*l, l - k, q**2)**2
-        ret2 *= q**(2*(s + (p - qq)/2) + 2*(l + p - n)*(l - n) + 2*(n + s - l - qq)*(n + s - l)) \
+        ret2 *= q**(2*(l - 2*n + (p + qq)/2 - s) + 2*(l + p - n)*(l - n) + 2*(n + s - l - qq)*(n + s - l)) \
             * qbinomial(2*l1, l + p - n, q**2) \
             * qbinomial(2*m1, n + s, q**2) 
         ret1 += ret2
@@ -1066,6 +1142,7 @@ def funcd3(l, s, p, qq):
     return ret1
 
 def funcd4(l, s, p, qq):
+    '''Substituting k(m) = m + n + s - l.'''
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -1078,18 +1155,19 @@ def funcd4(l, s, p, qq):
         i, j = n + s - (l + qq)/2, (l + p)/2 - n
         for m in srange(0, l - s - p + 1):
             k = m + n + s - l
-            ret2 += q**(2*m*(2*l - 2*n + p + qq - s)) \
+            ret2 += q**(2*m*(2*l - 2*n + p + qq - s + 1)) \
                 * qbinomial(l - p, m + s, q**2) \
                 * qbinomial(l - qq, m, q**2) \
                 / qbinomial(2*l, m + n + s, q**2)**2
-        ret2 *= q**(2*s*(l + p - n)) \
+        ret2 *= q**(-2*n*(s + 1)) \
             * qbinomial(2*l1, n, q**2) \
             * qbinomial(2*m1, n + s, q**2) 
         ret1 += ret2
 
-    return q**(2*(s + (p - qq)/2))*ret1
+    return q**(2*(l + p)*s + p + qq)*ret1
 
 def funcd5(l, s, p, qq):
+    '''Writing out all qbinomials in m-sum and move a minus sign.'''
     # Good test case: 7/2, 1, -1/2, -1/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1101,7 +1179,7 @@ def funcd5(l, s, p, qq):
         ret2 = 0
         i, j = n + s - (l + qq)/2, (l + p)/2 - n
         for m in srange(0, l - s - p + 1):
-            ret2 += q**(2*m*(2*l - 2*n + p + qq - s)) \
+            ret2 += q**(2*m*(2*l - 2*n + p + qq - s + 1)) \
                 * q**((2*l - 2*p)*(m + s) - 2*binomial(m + s, 2)) \
                 * qpoch(q**(2*p - 2*l), q**2, m + s) \
                 / qpoch(q**2, q**2, m + s) \
@@ -1111,14 +1189,15 @@ def funcd5(l, s, p, qq):
                 * q**(-2*(4*l)*(m + n + s) + 4*binomial(m + n + s, 2)) \
                 * qpoch(q**2, q**2, m + n + s)**2 \
                 / qpoch(q**(-4*l), q**2, m + n + s)**2
-        ret2 *= q**(2*s*(l + p - n)) \
+        ret2 *= q**(-2*n*(s + 1)) \
             * qbinomial(2*l1, n, q**2) \
             * qbinomial(2*m1, n + s, q**2) 
         ret1 += ret2
 
-    return (-1)**s * q**(2*(s + (p - qq)/2))*ret1
+    return (-1)**s * q**(2*(l + p)*s + p + qq)*ret1
 
 def funcd6(l, s, p, qq):
+    '''Rewrite the m-sum to a basic hypergeometric series and group all q-powers.'''
     # Good test case: 7/2, 1, -1/2, -1/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1130,7 +1209,7 @@ def funcd6(l, s, p, qq):
         ret2 = 0
         i, j = n + s - (l + qq)/2, (l + p)/2 - n
         #for m in srange(0, l - s - p + 1):
-        #    ret2 += qpoch(q**(2*p - 2*l + 2*s), q**2, m) \
+        #    ret2 += q**(2*m) * qpoch(q**(2*p - 2*l + 2*s), q**2, m) \
         #        / qpoch(q**(2 + 2*s), q**2, m) \
         #        * qpoch(q**(2*qq - 2*l), q**2, m) \
         #        / qpoch(q**2, q**2, m) \
@@ -1145,8 +1224,8 @@ def funcd6(l, s, p, qq):
                 q**(2*s + 2),
                 q**(2*s + 2*n - 4*l),
                 q**(2*s + 2*n - 4*l)
-            ], q**2, 1)
-        ret2 *= q**(2*s*(l + p - n)) * q**(-2*(4*l + 1)*n + 2*n**2 - (6*l - 4*n + 2*p + 1)*s + s**2) \
+            ], q**2, q**2)
+        ret2 *= q**(-2*n*(s + 1) - 2*(4*l + 1)*n + 2*n**2 - (6*l - 4*n + 2*p + 1)*s + s**2) \
             * qpoch(q**(2*p - 2*l), q**2, s) \
             / qpoch(q**2, q**2, s) \
             * qpoch(q**2, q**2, n + s)**2 \
@@ -1155,9 +1234,10 @@ def funcd6(l, s, p, qq):
             * qbinomial(2*m1, n + s, q**2) 
         ret1 += ret2
 
-    return (-1)**s * q**(2*(s + (p - qq)/2))*ret1
+    return (-1)**s * q**(2*(l + p)*s + p + qq)*ret1
 
 def funcd7(l, s, p, qq):
+    '''Simplifying the q-powers.'''
     # Good test case: 7/2, 1, -1/2, -1/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1167,7 +1247,6 @@ def funcd7(l, s, p, qq):
     ret1 = 0
     for n in srange(l + qq - s + 1):
         ret2 = 0
-        i, j = n + s - (l + qq)/2, (l + p)/2 - n
         ret2 += bhs([
                 q**(2*p - 2*l + 2*s),   
                 q**(2*qq - 2*l),
@@ -1177,8 +1256,8 @@ def funcd7(l, s, p, qq):
                 q**(2*s + 2),
                 q**(2*s + 2*n - 4*l),
                 q**(2*s + 2*n - 4*l)
-            ], q**2, 1)
-        ret2 *= q**(2*n**2 + 2*n*(-4*l + s - 1))  \
+            ], q**2, q**2)
+        ret2 *= q**(2*n**2 + 2*n*(-4*l + s - 2))  \
             * qpoch(q**(2*p - 2*l), q**2, s) \
             / qpoch(q**2, q**2, s) \
             * qpoch(q**2, q**2, n + s)**2 \
@@ -1187,9 +1266,10 @@ def funcd7(l, s, p, qq):
             * qbinomial(2*m1, n + s, q**2) 
         ret1 += ret2
 
-    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+    return (-1)**s * q**(-4*l*s + s**2 + p + qq - s) * ret1
 
 def funcd8(l, s, p, qq):
+    '''Substitute n = -n + l + qq - s.'''
     # Good test case: 7/2, 1, -1/2, -1/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1208,8 +1288,8 @@ def funcd8(l, s, p, qq):
                 q**(2*s + 2),
                 q**(-2*l - 2*n + 2*qq),
                 q**(-2*l - 2*n + 2*qq)
-            ], q**2, 1)
-        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s))
+            ], q**2, q**2)
+        ret2 *= q**(-2*(3*l + n - qq + 2)*(l - n + qq - s))
         ret2 *= qpoch(q**(2*p - 2*l), q**2, s) \
             / qpoch(q**2, q**2, s) \
             * qpoch(q**2, q**2, -n + l + qq)**2 \
@@ -1218,7 +1298,7 @@ def funcd8(l, s, p, qq):
             * qbinomial(2*m1, - n + l + qq, q**2) 
         ret1 += ret2
 
-    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+    return (-1)**s * q**(-4*l*s + s**2 + p + qq - s) * ret1
 
 def test_funcd(f1, f2):
     for i in range(3):
@@ -1229,6 +1309,7 @@ def test_funcd(f1, f2):
         print 3, i, bool(f1(3, i, -1, -2) == f2(3, i, -1, -2))
 
 def funcd9(l, s, p, qq):
+    '''Expand all qpochhammer sybols and try to group n's.'''
     # Good test case: 7/2, 2, -1/2, -3/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1247,8 +1328,8 @@ def funcd9(l, s, p, qq):
                 q**(2*s + 2),
                 q**(-2*l - 2*n + 2*qq),
                 q**(-2*l - 2*n + 2*qq)
-            ], q**2, 1)
-        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
+            ], q**2, q**2)
+        ret2 *= q**(-2*(3*l + n - qq + 2)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
         #ret2 *= qpoch(q**(2*p - 2*l), q**2, s) \
         #    / qpoch(q**2, q**2, s) \
         #    * qpoch(q**2, q**2, l + qq)**2 * qpoch(q**(2 + 2*l + 2*qq), q**2, -n)**2 \
@@ -1267,9 +1348,10 @@ def funcd9(l, s, p, qq):
             / qpoch(q**2, q**2, l + qq) / qpoch(q**(2 + 2*l + 2*qq), q**2, -n)
         ret1 += ret2
 
-    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+    return (-1)**s * q**(-4*l*s + s^2 + p + qq - s) * ret1
 
 def funcd10(l, s, p, qq):
+    '''Rewrite -n's to n's.'''
     # Good test case: 7/2, 2, -1/2, -3/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1288,8 +1370,8 @@ def funcd10(l, s, p, qq):
                 q**(2*s + 2),
                 q**(-2*l - 2*n + 2*qq),
                 q**(-2*l - 2*n + 2*qq)
-            ], q**2, 1)
-        ret2 *= q**(-2*(3*l + n - qq + 1)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
+            ], q**2, q**2)
+        ret2 *= q**(-2*(3*l + n - qq + 2)*(l - n + qq - s)) * (-1)**(-n + l + qq - s) * q**((2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2)) 
         ret2 *= q**(2*n*(-2*l - 2*qq) + 4*binomial(n, 2)) / qpoch(q**(-2*l - 2*qq), q**2, n)**2 \
             / q**(2*n*(2 + 2*l - 2*qq) + 4*binomial(n, 2)) * qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
             * (-1)**n * q**((2 + 2*p - 2*qq + 2*s)*n + 2*binomial(n, 2)) / qpoch(q**(2 + 2*p - 2*qq + 2*s), q**2, n) \
@@ -1307,9 +1389,10 @@ def funcd10(l, s, p, qq):
         * qpoch(q**2, q**2, l + qq) \
         / qpoch(q**2, q**2, l + qq)
 
-    return (-1)**s * q**(-4*l*s + s^2 + p - qq + s) * ret1
+    return (-1)**s * q**(-4*l*s + s^2 + p + qq - s) * ret1
 
 def funcd11(l, s, p, qq):
+    '''Simplifying the q-powers, group qpochhammersymbols.'''
     # Good test case: 7/2, 2, -1/2, -3/2
     l1 = (l + p)/2
     l2 = (l - p)/2
@@ -1328,7 +1411,10 @@ def funcd11(l, s, p, qq):
                 q**(2*s + 2),
                 q**(-2*l - 2*n + 2*qq),
                 q**(-2*l - 2*n + 2*qq)
-            ], q**2, 1)
+            ], q**2, q**2)
+        #ret2 *= (-1)**(l + qq - s)
+        #ret2 *= q**(-2*(3*l + n - qq + 2)*(l - n + qq - s) + (2*l + 2*p)*(-n + l + qq - s) - 2*binomial(-n + l + qq - s, 2) + 2*n*(-2*l - 2*qq) + 4*binomial(n, 2) - 2*n*(2 + 2*l - 2*qq) - 4*binomial(n, 2) + (2 + 2*p - 2*qq + 2*s)*n + 2*binomial(n, 2) - n*(-2*l - 2*qq + 2*s) - 2*binomial(n, 2) + n*(2*l + 2*qq) - 2*binomial(n, 2))
+        ret2 *= q**(2*n)
         ret2 *= 1 / qpoch(q**(-2*l - 2*qq), q**2, n)**2 \
             * qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
             / qpoch(q**(2 + 2*p - 2*qq + 2*s), q**2, n) \
@@ -1346,11 +1432,60 @@ def funcd11(l, s, p, qq):
         * qpoch(q**2, q**2, l + qq) \
         / qpoch(q**2, q**2, l + qq)
 
-    ret1 *= (-1)**(l + qq) * q**(-4*l*s + s**2 + p - qq + s -5*l**2 + 2*l*p - 4*l*qq + 2*p*qq + qq**2 + 6*l*s - 2*p*s - s**2 - l - qq + s)
+    ret1 *= (-1)**(l + qq) * q**(-5*l^2 + (2*l + 1)*p - 2*(2*l - p + 1)*qq + qq^2 + 2*(l - p + 1)*s - 3*l)
     return ret1
 
-def funcd12(l, s, p, qq):
-    # Good test case: 7/2, 2, -1/2, -3/2
+def funce1(l, s, p, qq):
+    '''From the definition of sum over t.'''
+    ret = 0
+    r = s + (p - qq)/2
+
+    for t in range(l + qq - s + 1):
+        ret += explicit_weight_elm(l, t, l + p, l + qq)
+
+    return ret
+
+def funce2(l, s, p, qq):
+    '''Writing out the definition and replace r(s) = s + (p - qq)/2.'''
+    r = s + (p - qq)/2
+    ret = 0
+
+    for t in range(l + qq - s + 1):
+        m, n = l + p, l + qq
+        k = 2*l + 2*t - n - m
+        ret += q**(2*l**2 + 2*l*p + 2*l*qq + 2*p*qq - 4*l*t - 2*p*t - 2*qq*t + 2*t**2 + p + qq - 2*t) \
+            * (1 - q**(4*l + 2)) / (1 - q**(2*l + 2*qq + 2)) \
+            * qpoch(q**2, q**2, l - p) \
+            * qpoch(q**2, q**2, l + p) \
+            / qpoch(q**2, q**2, 2*l) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - t) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - t) \
+            * qpoch(q**(4*l + 4 - 2*t), q**2, t) \
+            / qpoch(q**2, q**2, t)
+
+    return ret
+
+def funce3(l, s, p, qq):
+    '''Replace t to n and get out all non-independant n variables.'''
+    r = s + (p - qq)/2
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(2*l**2 + 2*l*p + 2*l*qq + 2*p*qq + p + qq) \
+        * (1 - q**(4*l + 2)) / (1 - q**(2*l + 2*qq + 2)) \
+        * qpoch(q**2, q**2, l - p) \
+        * qpoch(q**2, q**2, l + p) \
+        / qpoch(q**2, q**2, 2*l)
+
+    return ret
+
+def func_lhs(l, s, p, qq):
     l1 = (l + p)/2
     l2 = (l - p)/2
     m1 = (l + qq)/2
@@ -1368,7 +1503,8 @@ def funcd12(l, s, p, qq):
                 q**(2*s + 2),
                 q**(-2*l - 2*n + 2*qq),
                 q**(-2*l - 2*n + 2*qq)
-            ], q**2, 1)
+            ], q**2, q**2)
+        ret2 *= q**(2*n)
         ret2 *= qpoch(q**(2 + 2*l - 2*qq), q**2, n)**2 \
             * qpoch(q**(-2*l - 2*qq + 2*s), q**2, n) \
             / qpoch(q**(-2*l - 2*qq), q**2, n) \
@@ -1376,12 +1512,152 @@ def funcd12(l, s, p, qq):
             / qpoch(q**2, q**2, n)
         ret1 += ret2
 
-    ret1 *= qpoch(q**(2*p - 2*l), q**2, s) \
-        /  qpoch(q**2, q**2, s) \
-        * qpoch(q**2, q**2, l + qq)**2 \
-        / qpoch(q**(-4*l), q**2, l + qq)**2 \
-        * qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
-        / qpoch(q**2, q**2, l + qq - s) \
-
-    ret1 *= (-1)**(l + qq) * q**(-4*l*s + s**2 + p - qq + s -5*l**2 + 2*l*p - 4*l*qq + 2*p*qq + qq**2 + 6*l*s - 2*p*s - s**2 - l - qq + s)
     return ret1
+
+def func_rhs1(l, s, p, qq):
+    '''Move all undependant variables from left to right.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(2*l**2 + 2*l*p + 2*l*qq + 2*p*qq + p + qq) \
+        * (1 - q**(4*l + 2)) / (1 - q**(2*l + 2*qq + 2)) \
+        * qpoch(q**2, q**2, l - p) \
+        * qpoch(q**2, q**2, l + p) \
+        / qpoch(q**2, q**2, 2*l)
+    
+    ret *= 1 / qpoch(q**(2*p - 2*l), q**2, s) \
+        *  qpoch(q**2, q**2, s) \
+        / qpoch(q**2, q**2, l + qq)**2 \
+        * qpoch(q**(-4*l), q**2, l + qq)**2 \
+        / qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
+        * qpoch(q**2, q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq) \
+        * qpoch(q**2, q**2, l + qq)
+
+    ret *= (-1)**(l + qq) / q**(-5*l^2 + (2*l + 1)*p - 2*(2*l - p + 1)*qq + qq^2 + 2*(l - p + 1)*s - 3*l)
+    
+    return ret
+
+def func_rhs2(l, s, p, qq):
+    '''Simplifying.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(7*l**2 + 3*(2*l + 1)*qq - qq**2 - 2*(l - p + 1)*s + 3*l) \
+        * (1 - q**(4*l + 2)) / (1 - q**(2*l + 2*qq + 2)) \
+        * qpoch(q**2, q**2, l - p) \
+        * qpoch(q**2, q**2, l + p) \
+        * qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, l + qq) \
+        * qpoch(q**(-4*l), q**2, l + qq)**2 \
+        * qpoch(q**2, q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq)**2 \
+        / qpoch(q**(-2*l - 2*p), q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l + qq) \
+        / qpoch(q**2, q**2, 2*l) \
+        / qpoch(q**(2*p - 2*l), q**2, s)
+
+    ret *= (-1)**(l + qq)
+    
+    return ret
+
+def func_rhs3(l, s, p, qq):
+    '''Rewriting everything to (q^2)_n.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(7*l**2 + 3*(2*l + 1)*qq - qq**2 - 2*(l - p + 1)*s + 3*l + 4*binomial(l + qq, 2) - 4*(2*l)*(l + qq) - 2*binomial(l + qq - s, 2) + 2*(l + p)*(l + qq - s) - 2*binomial(s, 2) + 2*(l - p)*s) \
+        * (1 - q**(4*l + 2)) / (1 - q**(2*l + 2*qq + 2)) \
+        * qpoch(q**2, q**2, l - p) \
+        * qpoch(q**2, q**2, l + p) \
+        * qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, l + qq) \
+        * qpoch(q**2, q**2, 2*l)**2 \
+        * qpoch(q**2, q**2, l - p - s) \
+        * qpoch(q**2, q**2, p - qq + s) \
+        * qpoch(q**2, q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l - qq)**2 \
+        / qpoch(q**2, q**2, l + qq)**2 \
+        / qpoch(q**2, q**2, l + p) \
+        / qpoch(q**2, q**2, l + qq) \
+        / qpoch(q**2, q**2, 2*l) \
+        / qpoch(q**2, q**2, l - p) \
+    
+    return ret
+
+def func_rhs4(l, s, p, qq):
+    '''Simplifying q.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(2*(l + p + s + 1)*(l + qq - s)) \
+        * qpoch(q**2, q**2, s) \
+        * qpoch(q**2, q**2, 2*l + 1) \
+        * qpoch(q**2, q**2, l - p - s) \
+        * qpoch(q**2, q**2, p - qq + s) \
+        * qpoch(q**2, q**2, l + qq - s) \
+        / qpoch(q**2, q**2, l - qq)**2 \
+        / qpoch(q**2, q**2, l + qq) \
+        / qpoch(q**2, q**2, l + qq + 1)
+    
+    return ret
+
+def func_rhs5(l, s, p, qq):
+    '''Replace to qbinomials.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(2*(l + p + s + 1)*(l + qq - s)) \
+        * qbinomial(2*l + 1, l - qq, q**2) \
+        / qbinomial(l - qq, l - p - s, q**2) \
+        / qbinomial(l + qq, s, q**2)
+ 
+    return ret
+
+def func_rhs6(l, s, p, qq):
+    '''Replace to qbinomials.'''
+    ret = 0
+
+    for n in range(l + qq - s + 1):
+        ret += q**(n*(-4*l - 2*p - 2*qq - 2) + 2*n**2) \
+            * qpoch(q**(2*l - 2*qq), q**(-2), l + p - n) \
+            / qpoch(q**(2*l + 2*qq + 4), q**2, l + p - n) \
+            * qpoch(q**(4*l + 4 - 2*n), q**2, n) \
+            / qpoch(q**2, q**2, n)
+    
+    ret *= q**(2*(l + p + s + 1)*(l + qq - s)) \
+        * qbinomial(2*l + 1, l - qq, q**2) \
+        / qbinomial(l - qq, l - p - s, q**2) \
+        / qbinomial(l + qq, s, q**2)
+ 
+    return ret
