@@ -1,6 +1,33 @@
 #from basichypergeometric import *
 load('basichypergeometric.sage')
 
+def replace_z_x(polynomial):
+    q, z, x = var('q z x')
+
+    ret_poly = 0
+
+    while polynomial.full_simplify() != 0:
+        coef = polynomial.coefficients(z)
+        coef = [ c for c in coef if c[0] != 0 ]
+
+        constant = True
+        for c, dg in coef:
+            if dg != 0 and c != 0:
+                constant = False        
+
+        if constant:
+            return ret_poly + polynomial.full_simplify()
+
+        first, last = coef[0], coef[-1]
+
+        if not (first[0] == last[0] and first[1] == -last[1]):
+            return None
+        
+        ret_poly += first[0]*(2*x)**(last[1])
+        polynomial -= first[0]*(z + z**(-1))**(last[1])
+
+    return ret_poly
+
 def askey_wilson(n, z, a, b, c, d, q):
     lc = qpoch([a*b, a*c, a*d], q, n) / a**n
     poly = bhs(
@@ -99,3 +126,29 @@ def dual_q_Hahn_polynomials(n, x, c, d, N, q):
             result += qpoch1.evaluate() / qpoch2.evaluate() * q**k
 
     return result       
+
+def rogers_polynomials(n, x, b, q, inx=True):
+    z = var('z')
+
+    ret = 0
+    for k in range(n+1):
+        ret += qpoch(b, q, k) * qpoch(b, q, n-k) \
+            / (qpoch(q, q, k) * qpoch(q, q, n-k)) * z**(n - 2*k)
+
+    if inx:
+        return replace_z_x(ret)
+    else:
+        return ret
+
+q_ultraspherical = rogers_polynomials
+
+def continuous_q_jacobi(n, x, a, b, q):
+    z = var('z')
+    lc = qpoch(q**(a + 1), q, n) / qpoch(q, q, n)
+    poly = bhs(
+        [q**(-n), q**(n + a + b + 1), q**(1/2*a + 1/4)*z, 
+            q**(1/2*a + 1/4)*z**(-1)],
+        [q**(a + 1), -q**(1/2*(a + b + 1)), q**(1/2*(a + b + 2))], q, q)
+
+    return lc*poly
+    #return lc*replace_z_x(poly)
