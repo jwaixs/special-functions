@@ -152,3 +152,14 @@ def continuous_q_jacobi(n, x, a, b, q):
 
     return lc*poly
     #return lc*replace_z_x(poly)
+
+def test_q_ck(m, n, a, b, q):
+    ret = 0
+
+    for k in range(n, m+1):
+        ret += continuous_q_jacobi(m-k, x, a+k, b+k, q) \
+            * continuous_q_jacobi(k-n, x, -a-k, -b-k-1, q)
+            #((k+b)/(n+a) * jacobi(k-n, x, -a-k, -b-k) \
+            #    + (a-b)/(n+a) * jacobi(k-n, x, -a-k, -b-k-1))
+
+    return ret

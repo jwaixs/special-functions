@@ -171,6 +171,9 @@ class PochhammerSymbol():
         else:
             return 0
 
+def poch(a, n): 
+    return PochhammerSymbol(a, n).evaluate()
+
 class HypergeometricSeries():
     """
     An implementation of the Hypergeometric series.
@@ -382,3 +385,6 @@ class HypergeometricSeries():
 
         """
         return sum(list(self))
+
+def hs(nom, denom, z):
+    return HypergeometricSeries(nom, denom, z).evaluate()
