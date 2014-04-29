@@ -141,7 +141,10 @@ def stieltjes_wigert(n, x, q):
     return lc*poly
 
 def discrete_q_hermite1(n, x, q):
-    pass
+    return q**binomial(n, 2) * bhs([q**(-n), x**(-1)], [0], q, -q*x)
 
 def discrete_q_hermite2(n, x, q):
-    pass
+    lc = (I)**(-n) * q**(-binomial(n, 2))
+    poly = bhs([q**(-n), I*x], [], q, -q**n)
+
+    return lc*poly
