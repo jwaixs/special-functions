@@ -4,7 +4,7 @@ Hypergeometric Series
 A module for computing Hypergeometric series.
 
 AUTHORS:
-    - Noud Aldenhoven (November 2012)
+    - Noud Aldenhoven (2014)
 
 REFERENCES:
     - Special Functions - Andrews, Askey, Roy
